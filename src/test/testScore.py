@@ -586,7 +586,7 @@ class TestIteration(unittest.TestCase):
         self.assertEqual([m[1] for m in measures[0:12]],
                          [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3])
         self.assertEqual([m[1] for m in measures[12:]],
-                         range(4, 26))
+                         list(range(4, 26)))
         for measure, index in measures:
             self.assertEqual(measure, self.score.getMeasureByIndex(index))
 
@@ -602,7 +602,7 @@ class TestIteration(unittest.TestCase):
         self.assertEqual([m[1] for m in measures[0:14]],
                          [0, 1, 0, 2, 0, 1, 0, 1, 0, 1, 0, 2, 0, 3])
         self.assertEqual([m[1] for m in measures[14:]],
-                         range(4, 26))
+                         list(range(4, 26)))
         for measure, index in measures:
             self.assertEqual(measure, self.score.getMeasureByIndex(index))
 
@@ -618,7 +618,7 @@ class TestIteration(unittest.TestCase):
         self.assertEqual([m[1] for m in measures[0:14]],
                          [0, 1, 0, 2, 0, 1, 0, 1, 0, 1, 0, 2, 0, 3])
         self.assertEqual([m[1] for m in measures[14:]],
-                         range(4, 26))
+                         list(range(4, 26)))
         for measure, index in measures:
             self.assertEqual(measure, self.score.getMeasureByIndex(index))
 
@@ -633,7 +633,7 @@ class TestIteration(unittest.TestCase):
         self.assertEqual([m[1] for m in measures[0:14]],
                          [0, 1, 0, 2, 0, 1, 0, 1, 0, 1, 0, 2, 0, 3])
         self.assertEqual([m[1] for m in measures[14:]],
-                         range(4, 26))
+                         list(range(4, 26)))
         for measure, index in measures:
             self.assertEqual(measure, self.score.getMeasureByIndex(index))
 
@@ -729,7 +729,7 @@ class TestSections(unittest.TestCase):
         self.assertEqual(measureIndexes, [0, 1, 2, 3])
         measureIndexes = [ord(measure.noteAt(0, 0)) - ord('a') for measure
                           in self.score.iterMeasuresInSection(1)]
-        self.assertEqual(measureIndexes, range(4, 20))
+        self.assertEqual(measureIndexes, list(range(4, 20)))
         self.assertRaises(BadTimeError, list,
                           self.score.iterMeasuresInSection(3))
 
@@ -1051,7 +1051,7 @@ class TestCallBack(unittest.TestCase):
         self.score.formatScore(80)
         self.calls = []
 
-    def myCallBack(position):
+        def myCallBack(position):
             self.calls.append((position.staffIndex,
                                position.measureIndex,
                                position.noteTime,
@@ -1126,7 +1126,7 @@ class TestHash(unittest.TestCase):
 
     def testEmpty(self):
         hashVal = self.score.hashScore()
-        self.assertEqual(hashVal.encode("hex"),
+        self.assertEqual(hashVal.hex(),
                          "95b319c82f934d9abfce950b58a7c3bd")
 
 

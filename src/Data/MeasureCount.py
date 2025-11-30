@@ -152,7 +152,7 @@ def counterMaker(beatLength, numTicks):
               defaultRegistry.countsByTicks(beatLength)]
     count = counts[0]
     mc = MeasureCount()
-    mc.addSimpleBeats(count, numTicks / beatLength)
+    mc.addSimpleBeats(count, numTicks // beatLength)
     return mc
 
 

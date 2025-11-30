@@ -27,7 +27,7 @@ import glob
 import os
 import tempfile
 import codecs
-import cStringIO
+from io import StringIO as _StringIO
 from Data.ScoreSerializer import ScoreSerializer
 from Data.ScoreFactory import ScoreFactory
 from Data import DBConstants
@@ -36,11 +36,8 @@ from Data import fileUtils
 
 
 def StringIO(*args, **kwargs):  # IGNORE:invalid-name
-    "Utility function to wrap StringIO with utf-8 reading/writing"
-    handle = cStringIO.StringIO(*args, **kwargs)
-    return codecs.StreamReaderWriter(handle,
-                                     codecs.getreader('utf-8'),
-                                     codecs.getwriter('utf-8'))
+    "Utility function to create StringIO - Python 3's StringIO already handles unicode"
+    return _StringIO(*args, **kwargs)
 
 
 class TestScoreSerializerGeneral(unittest.TestCase):
@@ -252,27 +249,27 @@ class TestScoreSerializerV0(unittest.TestCase):
     def testReadNoFileFormatNumber(self):
         handle = StringIO(self.ff_zero_data)
         score = ScoreSerializer.read(handle)
-        self.assert_(score.lilyFill)
+        self.assertTrue(score.lilyFill)
         self.assertEqual(score.lilypages, 2)
         self.assertEqual(score.lilysize, 18)
         self.assertEqual(score.scoreData.title, "Sample")
         self.assertEqual(score.numSections(), 1)
         self.assertEqual(score.getSectionTitle(0), "A title")
         self.assertEqual(score.numMeasures(), 7)
-        self.assert_(score.drumKit[1].isAllowedHead('q'))
+        self.assertTrue(score.drumKit[1].isAllowedHead('q'))
 
     def testReadVersion0(self):
         handle = StringIO("""DB_FILE_FORMAT 0
         """ + self.ff_zero_data)
         score = ScoreSerializer.read(handle)
-        self.assert_(score.lilyFill)
+        self.assertTrue(score.lilyFill)
         self.assertEqual(score.lilypages, 2)
         self.assertEqual(score.lilysize, 18)
         self.assertEqual(score.scoreData.title, "Sample")
         self.assertEqual(score.numSections(), 1)
         self.assertEqual(score.getSectionTitle(0), "A title")
         self.assertEqual(score.numMeasures(), 7)
-        self.assert_(score.drumKit[1].isAllowedHead('q'))
+        self.assertTrue(score.drumKit[1].isAllowedHead('q'))
 
     class NoFF(RuntimeError):
         pass
@@ -346,10 +343,10 @@ class TestScoreSerializerV0(unittest.TestCase):
         return data, written
 
     def testVersion0Files(self):
-        print "Version 0"
+        print("Version 0")
         fileglob = os.path.join("testdata", "v0", "*.brp")
         for testfile in glob.glob(fileglob):
-            print testfile
+            print(testfile)
             score = ScoreSerializer.loadScore(testfile)
             written = StringIO()
             ScoreSerializer.write(score, written, DBConstants.DBFF_0)
@@ -390,10 +387,10 @@ class TestScoreSerializerV0(unittest.TestCase):
 
 class TestScoreSerializerV1(unittest.TestCase):
     def testReadV0WriteV1ReadV1(self):
-        print "Read Version 0, Write Version 1"
+        print("Read Version 0, Write Version 1")
         fileglob = os.path.join("testdata", "v0", "*.brp")
         for testfile in glob.glob(fileglob):
-            print testfile
+            print(testfile)
             score = ScoreSerializer.loadScore(testfile)
             written = StringIO()
             ScoreSerializer.write(score, written, DBConstants.DBFF_1)
@@ -402,10 +399,10 @@ class TestScoreSerializerV1(unittest.TestCase):
             self.assertEqual(score.hashScore(), score2.hashScore())
 
     def testReadV1WriteV1(self):
-        print "Read Version 1, Write Version 1"
+        print("Read Version 1, Write Version 1")
         fileglob = os.path.join("testdata", "v1", "*.brp")
         for testfile in glob.glob(fileglob):
-            print testfile
+            print(testfile)
             score = ScoreSerializer.loadScore(testfile)
             written = StringIO()
             ScoreSerializer.write(score, written, DBConstants.DBFF_1)

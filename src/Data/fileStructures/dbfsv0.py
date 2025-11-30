@@ -109,15 +109,49 @@ class BeatLengthFieldV0(NoWriteField):
 
 
 def startBarlineString(measure):
-    return ",".join([name for name, value in
-                     Data.DBConstants.BAR_TYPES.items()
-                     if (measure.startBar & value) == value])
+    # Generate comma-separated list of barline flags
+    # Pattern: 1, 2, 16, NO_BAR, 8, 4
+    flags = [(name, value) for (name, value) in Data.DBConstants.BAR_TYPES.items()
+             if (measure.startBar & value) == value and name != Data.DBConstants.NO_BAR]
+
+    # Split: before NO_BAR (1, 2, 16) and after NO_BAR (4, 8)
+    before_no_bar = [(name, value) for name, value in flags if value in (1, 2, 16)]
+    after_no_bar = [(name, value) for name, value in flags if value in (4, 8)]
+
+    # Sort before by bit value ascending, after by bit value descending
+    before_no_bar.sort(key=lambda x: x[1])
+    after_no_bar.sort(key=lambda x: x[1], reverse=True)
+
+    # Combine: before flags, NO_BAR (if any non-NO_BAR flags exist), after flags
+    result = [name for name, value in before_no_bar]
+    if flags:  # Only add NO_BAR if there are other flags
+        result.append(Data.DBConstants.NO_BAR)
+    result.extend([name for name, value in after_no_bar])
+
+    return ",".join(result) if result else Data.DBConstants.NO_BAR
 
 
 def endBarlineString(measure):
-    return ",".join([name for name, value in
-                     Data.DBConstants.BAR_TYPES.items()
-                     if (measure.endBar & value) == value])
+    # Generate comma-separated list of barline flags
+    # Pattern: 1, 2, 16, NO_BAR, 8, 4
+    flags = [(name, value) for (name, value) in Data.DBConstants.BAR_TYPES.items()
+             if (measure.endBar & value) == value and name != Data.DBConstants.NO_BAR]
+
+    # Split: before NO_BAR (1, 2, 16) and after NO_BAR (4, 8)
+    before_no_bar = [(name, value) for name, value in flags if value in (1, 2, 16)]
+    after_no_bar = [(name, value) for name, value in flags if value in (4, 8)]
+
+    # Sort before by bit value ascending, after by bit value descending
+    before_no_bar.sort(key=lambda x: x[1])
+    after_no_bar.sort(key=lambda x: x[1], reverse=True)
+
+    # Combine: before flags, NO_BAR (if any non-NO_BAR flags exist), after flags
+    result = [name for name, value in before_no_bar]
+    if flags:  # Only add NO_BAR if there are other flags
+        result.append(Data.DBConstants.NO_BAR)
+    result.extend([name for name, value in after_no_bar])
+
+    return ",".join(result) if result else Data.DBConstants.NO_BAR
 
 
 class BarlineReadFieldV0(NoWriteField):

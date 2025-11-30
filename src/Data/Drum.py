@@ -170,7 +170,10 @@ class Drum(object):
                     data.shortcut = head
                     availableShortcuts.remove(head)
                 else:
-                    data.shortcut = availableShortcuts.pop()
+                    # Use sorted list to make shortcut selection deterministic
+                    sorted_shortcuts = sorted(availableShortcuts)
+                    data.shortcut = sorted_shortcuts[0]
+                    availableShortcuts.remove(sorted_shortcuts[0])
 
     def shortcutsAndNoteHeads(self):
         shortcuts = []

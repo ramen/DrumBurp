@@ -45,13 +45,16 @@ class ScoreSerializer(object):
     @staticmethod
     def read(handle):
         # Check the file format version
-        handle, handleCopy = itertools.tee(handle)
+        # Read first line to check version, then prepend it back
         try:
-            firstline = handleCopy.next()
+            firstline = next(handle)
         except StopIteration:
             raise NoContent()
-        del handleCopy
+
+        # Chain the first line back with the rest of the handle
+        handle = itertools.chain([firstline], handle)
         scoreIterator = fileUtils.dbFileIterator(handle)
+
         if firstline.startswith(DBConstants.DB_FILE_FORMAT_STR):
             fileVersion = firstline.split()
             try:
@@ -59,7 +62,7 @@ class ScoreSerializer(object):
                     fileVersion = int(fileVersion[1])
             except (TypeError, ValueError):
                 fileVersion = DBConstants.DBFF_0
-            scoreIterator.next()
+            next(scoreIterator)
         else:
             fileVersion = DBConstants.DBFF_0
         if fileVersion > DBConstants.CURRENT_FILE_FORMAT:
@@ -72,13 +75,13 @@ class ScoreSerializer(object):
     @staticmethod
     def write(score, handle, version=DBConstants.CURRENT_FILE_FORMAT):
         scoreBuffer = StringIO()
-        scoreWriter = codecs.getwriter("utf-8")(scoreBuffer)
-        indenter = fileUtils.Indenter(scoreWriter)
+        indenter = fileUtils.Indenter(scoreBuffer)
         indenter(DBConstants.DB_FILE_FORMAT_STR, version)
         fileStructure = _FS_MAP.get(version,
                                     _FS_MAP[DBConstants.CURRENT_FILE_FORMAT])()
         fileStructure.write(score, indenter)
-        handle.write(scoreBuffer.getvalue().decode("utf-8"))
+        # In Python 3, StringIO.getvalue() returns a string
+        handle.write(scoreBuffer.getvalue())
 
     @classmethod
     def saveScore(cls, score, filename,

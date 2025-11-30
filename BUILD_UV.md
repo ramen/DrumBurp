@@ -107,9 +107,22 @@ uv pip install -e ".[dev]"
 
 ### Running Tests
 
+The tests use Python's built-in `unittest` framework (not pytest):
+
 ```bash
 source .venv/bin/activate
-python -m pytest src/test/
+PYTHONPATH=src python -m unittest discover -s src/test -p "test*.py"
+```
+
+For verbose output:
+```bash
+PYTHONPATH=src python -m unittest discover -s src/test -p "test*.py" -v
+```
+
+Alternatively, run from the src directory:
+```bash
+cd src
+python -m unittest discover -s test -p "test*.py"
 ```
 
 ### Code Quality

@@ -29,8 +29,8 @@ source .venv/bin/activate
 # Install dev dependencies
 uv pip install -e ".[dev]"
 
-# Run tests
-python -m pytest src/test/
+# Run tests (using unittest, not pytest)
+PYTHONPATH=src python -m unittest discover -s src/test -p "test*.py"
 
 # Lint code
 pylint src/

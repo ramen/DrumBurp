@@ -68,6 +68,7 @@ class dbFileIterator(object):
         self._handle = handle
         self.lineNumber = 0
         self.currentLine = ""
+        self._iterator = None
 
     def __iter__(self):
         for lineNumber, line in enumerate(self._handle):
@@ -84,8 +85,10 @@ class dbFileIterator(object):
             lineType = lineType.upper()
             yield lineType, lineData
 
-    def next(self):
-        return self._handle.next()
+    def __next__(self):
+        if self._iterator is None:
+            self._iterator = iter(self)
+        return next(self._iterator)
 
     def section(self, startLine, endLine, convertNone=None, readLines=None):
         return self._Section(self, startLine, endLine, convertNone, readLines)
@@ -99,13 +102,13 @@ class Indenter(object):
             self.start = sectionStart
             self.end = sectionEnd
 
-    def __enter__(self):
+        def __enter__(self):
             if self._doIndent:
                 self.indenter(self.start)
                 self.indenter.increase()
             return self
 
-    def __exit__(self, excType, excValue, excTraceback):
+        def __exit__(self, excType, excValue, excTraceback):
             if self._doIndent:
                 self.indenter.decrease()
                 self.indenter(self.end)
@@ -326,8 +329,9 @@ class StringField(SimpleValueField):
 
 class Base64StringField(SimpleValueField):
     def _processData(self, data):
+        import base64
         try:
-            data = data.decode("base64").decode("utf8")
+            data = base64.b64decode(data).decode("utf8")
         except binascii.Error:
             raise DBErrors.BadBase64()
         except UnicodeError:
@@ -335,7 +339,8 @@ class Base64StringField(SimpleValueField):
         return data
 
     def _toString(self, value):
-        return value.encode('utf8').encode('base64').strip()
+        import base64
+        return base64.b64encode(value.encode('utf8')).decode('ascii')
 
 
 class IntegerField(SimpleValueField):
@@ -421,8 +426,7 @@ class FileStructureMetaClass(type):
                 cls.endTag = "END_" + cls.tag
 
 
-class FileStructure(AbstractFileStructureElement):
-    __metaclass__ = FileStructureMetaClass
+class FileStructure(AbstractFileStructureElement, metaclass=FileStructureMetaClass):
     targetClass = dict
     tag = None
     startTag = None

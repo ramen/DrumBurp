@@ -39,7 +39,7 @@ class TestSimple(unittest.TestCase):
         self.assertEqual(self.count.numBeats(), 4)
 
     def testIsSimple(self):
-        self.assert_(self.count.isSimpleCount())
+        self.assertTrue(self.count.isSimpleCount())
 
     def testCount(self):
         self.assertEqual(list(self.count.count()),
@@ -54,13 +54,13 @@ class TestSimple(unittest.TestCase):
 
     def testGetItem(self):
         beat = self.count[1]
-        self.assert_(isinstance(beat, Beat.Beat))
+        self.assertTrue(isinstance(beat, Beat.Beat))
         self.assertEqual(beat.numTicks, 4)
         self.assertEqual(beat.ticksPerBeat, 4)
         self.assertRaises(IndexError, self.count.__getitem__, 4)
 
     def testIterTimesMs(self):
-        times = list(self.count.iterTimesMs(100))
+        times = list(self.count.iterTimesMs(100, 0))
         self.assertEqual(times, [0, 25, 50, 75,
                                  100, 125, 150, 175,
                                  200, 225, 250, 275,
@@ -87,7 +87,7 @@ class TestSimple(unittest.TestCase):
         self.assertEqual(ticks, [0, 4, 8, 12])
 
     def testIterMidiTicks(self):
-        ticks = list(self.count.iterMidiTicks())
+        ticks = list(self.count.iterMidiTicks(0))
         self.assertEqual(ticks, [0, 48, 96, 144,
                                  192, 240, 288, 336,
                                  384, 432, 480, 528,
@@ -135,13 +135,13 @@ class TestComplex(unittest.TestCase):
 
     def testGetItem(self):
         beat = self.count[1]
-        self.assert_(isinstance(beat, Beat.Beat))
+        self.assertTrue(isinstance(beat, Beat.Beat))
         self.assertEqual(beat.numTicks, 3)
         self.assertEqual(beat.ticksPerBeat, 3)
         self.assertRaises(IndexError, self.count.__getitem__, 4)
 
     def testIterTimesMs(self):
-        times = list(self.count.iterTimesMs(120))
+        times = list(self.count.iterTimesMs(120, 0))
         self.assertEqual(times, [0, 30, 60, 90,
                                  120, 160, 200,
                                  240, 300,
@@ -169,7 +169,7 @@ class TestComplex(unittest.TestCase):
         self.assertEqual(ticks, [0, 4, 7, 9])
 
     def testIterMidiTicks(self):
-        ticks = list(self.count.iterMidiTicks())
+        ticks = list(self.count.iterMidiTicks(0))
         self.assertEqual(ticks, [0, 48, 96, 144,
                                  192, 256, 320,
                                  384, 480,
@@ -187,8 +187,8 @@ class TestComplex(unittest.TestCase):
 class TestCounterMaker(unittest.TestCase):
     def testMake(self):
         count = MeasureCount.counterMaker(4, 16)
-        self.assert_(isinstance(count, MeasureCount.MeasureCount))
-        self.assert_(count.isSimpleCount())
+        self.assertTrue(isinstance(count, MeasureCount.MeasureCount))
+        self.assertTrue(count.isSimpleCount())
         self.assertEqual(len(count), 16)
 
 

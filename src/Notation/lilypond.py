@@ -210,12 +210,12 @@ class LilyDuration(object):
         baseNote = max(notesInTuplet)
         tupletNoteCount = 0
         for i in notesInTuplet:
-            tupletNoteCount += baseNote / i
+            tupletNoteCount += baseNote // i
 
         #nearest power of 2 (rounding down)
         tupletWholeNoteLength = 1<<int(log(tupletNoteCount,2))
 
-        self.compoundStart = r"\tuplet {0}/{1} {{".format(tupletNoteCount,tupletWholeNoteLength)
+        self.compoundStart = r"\times {0}/{1} {{".format(tupletWholeNoteLength,tupletNoteCount)
 
     def setCompoundEnd(self):
         self._compoundEnd = True

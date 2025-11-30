@@ -61,10 +61,36 @@ class NotePosition(object):
         np.measureIndex = None
         return np
 
-    def __cmp__(self, other):
+    def _comparison_key(self):
+        return (self.staffIndex, self.measureIndex,
+                self.noteTime, self.drumIndex)
+
+    def __lt__(self, other):
         if other is None:
-            return 1
-        return cmp((self.staffIndex, self.measureIndex,
-                    self.noteTime, self.drumIndex),
-                   (other.staffIndex, other.measureIndex,
-                    other.noteTime, other.drumIndex))
+            return False
+        return self._comparison_key() < other._comparison_key()
+
+    def __le__(self, other):
+        if other is None:
+            return False
+        return self._comparison_key() <= other._comparison_key()
+
+    def __gt__(self, other):
+        if other is None:
+            return True
+        return self._comparison_key() > other._comparison_key()
+
+    def __ge__(self, other):
+        if other is None:
+            return True
+        return self._comparison_key() >= other._comparison_key()
+
+    def __eq__(self, other):
+        if other is None:
+            return False
+        return self._comparison_key() == other._comparison_key()
+
+    def __ne__(self, other):
+        if other is None:
+            return True
+        return self._comparison_key() != other._comparison_key()
