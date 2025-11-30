@@ -162,16 +162,13 @@ _OUTPUT_DEVICES = []
 
 
 def refreshOutputDevices():
-    while _OUTPUT_DEVICES:
-        _OUTPUT_DEVICES.pop()
-    for devId in iterDeviceIds():
-        device = MidiDevice(devId)
-        if device.isOutput():
-            _OUTPUT_DEVICES.append(device)
+    # No device selection needed with pygame.mixer.music
+    pass
 
 
 def iterMidiDevices():
-    return iter(_OUTPUT_DEVICES)
+    # No devices to select with pygame.mixer.music
+    return iter([])
 
 
 from PyQt5.QtCore import QTimer, pyqtSignal, QObject
@@ -181,8 +178,6 @@ from Data.DBConstants import MIDITICKSPERBEAT
 class _midi(QObject):
     def __init__(self):
         super(_midi, self).__init__()
-        self._port = None
-        self._midiOut = None
         self.timer = QTimer()
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self._onSongEnd)
@@ -198,24 +193,17 @@ class _midi(QObject):
     def initialize(self):
         if not _MIDI_INITIALIZED:
             raise RuntimeError("MIDI not initialized yet!")
-        if self._port is None:
-            self._port = getDefaultId()
-        if self._port != -1:
-            self._midiOut = pygame.midi.Output(self._port, _LATENCY, _BUFSIZE)
+        # pygame.mixer.music is initialized globally, nothing to do here
 
     def setPort(self, port):
-        if self._midiOut:
-            self._midiOut.abort()
-            del self._midiOut
-            self._midiOut = None
-        self._port = port
-        self.initialize()
+        # Port selection not needed for pygame.mixer.music
+        pass
 
     def port(self):
-        return self._port
+        return -1
 
     def isGood(self):
-        return self._port != -1 and self._midiOut is not None
+        return _MIDI_INITIALIZED
 
     def setMute(self, onOff):
         self._mute = onOff
@@ -232,75 +220,83 @@ class _midi(QObject):
         self.playHeadData(headData)
 
     def playHeadData(self, headData, when=None):
-        # Ensure MIDI output is available
-        if not self._midiOut:
-            # Refresh port ID in case pygame.midi was reinitialized
-            self._port = getDefaultId()
-            if self._port != -1:
-                try:
-                    self._midiOut = pygame.midi.Output(self._port, _LATENCY, _BUFSIZE)
-                except:
-                    return
-            else:
-                return
-        if when is None:
-            when = pygame.midi.time()
+        # Stop any currently playing note
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.stop()
 
-        # Wrap the actual MIDI write in try/except to handle device errors
+        # Generate a mini MIDI file with just this one note
         try:
-            self._writeMidiNote(headData, when)
-        except Exception as e:
-            # If we get a host error, the device might be stale
-            # Try to recreate it once with a fresh port ID
-            try:
-                del self._midiOut
-                self._midiOut = None
-                self._port = getDefaultId()
-                if self._port != -1:
-                    self._midiOut = pygame.midi.Output(self._port, _LATENCY, _BUFSIZE)
-                    self._writeMidiNote(headData, when)
-            except:
-                # Give up if we still can't write
-                pass
+            midi = BytesIO()
+            self._exportSingleNote(headData, midi)
+            midi.seek(0, 0)
+            pygame.mixer.music.load(midi)
+            pygame.mixer.music.play()
+        except:
+            # Silently ignore playback failures
+            pass
 
-    def _writeMidiNote(self, headData, when):
-        """Actually write the MIDI note - separated for error recovery"""
-        # Boost volume for individual note playback (1.25x) to make them more audible
-        # but cap at 127 (max MIDI velocity)
-        boostedVolume = min(127, int(headData.midiVolume * 1.25))
+    def _exportSingleNote(self, headData, handle):
+        """Export a single note as a complete MIDI file for playback"""
+        from Data.DBConstants import MIDITICKSPERBEAT
 
+        # Write MIDI header
+        handle.write(b"MThd\x00\x00\x00\x06\x00\x00\x00\x01")
+        handle.write(bytes([(MIDITICKSPERBEAT >> 8) & 0xFF]))
+        handle.write(bytes([(MIDITICKSPERBEAT >> 0) & 0xFF]))
+
+        # Create MIDI events for the note (using proper variable-length delta times)
+        midiData = []
+
+        # Track start marker with text event
+        midiData.extend([0, 0xff, 0x1, 0])
+
+        # Set tempo to 120 BPM (500000 microseconds per beat)
+        midiData.extend([0, 0xff, 0x51, 3, 0x07, 0xA1, 0x20])
+
+        # Schedule the note(s) based on effect
         if headData.effect == "flam":
-            self._midiOut.write([[[_PERCUSSION_NOTE_ON,
-                                   headData.midiNote,
-                                   int(boostedVolume / FLAM_VOLUME_CONSTANT)],
-                                  when]])
-            self._midiOut.write([[[_PERCUSSION_NOTE_ON,
-                                   headData.midiNote,
-                                   boostedVolume],
-                                  when + FLAM_TIME_CONSTANT]])
+            # Grace note
+            deltaTime = 0
+            encodeSevenBitDelta(deltaTime, midiData)
+            midiData.extend([_PERCUSSION_NOTE_ON, headData.midiNote,
+                           int(headData.midiVolume / FLAM_VOLUME_CONSTANT)])
+            # Main note shortly after
+            deltaTime = int(MIDITICKSPERBEAT / FLAM_TIME_CONSTANT)
+            encodeSevenBitDelta(deltaTime, midiData)
+            midiData.extend([_PERCUSSION_NOTE_ON, headData.midiNote, headData.midiVolume])
         elif headData.effect == "drag":
-            self._midiOut.write([[[_PERCUSSION_NOTE_ON,
-                                   headData.midiNote,
-                                   boostedVolume],
-                                  when]])
-            self._midiOut.write([[[_PERCUSSION_NOTE_ON,
-                                   headData.midiNote,
-                                   boostedVolume],
-                                  when + DRAG_TIME_CONSTANT]])
+            # First note
+            encodeSevenBitDelta(0, midiData)
+            midiData.extend([_PERCUSSION_NOTE_ON, headData.midiNote, headData.midiVolume])
+            # Second note
+            deltaTime = int(MIDITICKSPERBEAT / 10)
+            encodeSevenBitDelta(deltaTime, midiData)
+            midiData.extend([_PERCUSSION_NOTE_ON, headData.midiNote, headData.midiVolume])
         elif headData.effect == "choke":
-            self._midiOut.write([[[_PERCUSSION_NOTE_ON,
-                                   headData.midiNote,
-                                   boostedVolume],
-                                  when]])
-            self._midiOut.write([[[_PERCUSSION_CHOKE,
-                                   _CHOKE_MSG,
-                                   _CHOKE_VELOCITY],
-                                  when + DRAG_TIME_CONSTANT]])
+            # Note on
+            encodeSevenBitDelta(0, midiData)
+            midiData.extend([_PERCUSSION_NOTE_ON, headData.midiNote, headData.midiVolume])
+            # Choke shortly after
+            deltaTime = int(MIDITICKSPERBEAT / 10)
+            encodeSevenBitDelta(deltaTime, midiData)
+            midiData.extend([_PERCUSSION_CHOKE, _CHOKE_MSG, _CHOKE_VELOCITY])
         else:
-            self._midiOut.write([[[_PERCUSSION_NOTE_ON,
-                                   headData.midiNote,
-                                   boostedVolume],
-                                  when]])
+            # Simple note
+            encodeSevenBitDelta(0, midiData)
+            midiData.extend([_PERCUSSION_NOTE_ON, headData.midiNote, headData.midiVolume])
+
+        # Wait a bit then end track (let note ring)
+        encodeSevenBitDelta(MIDITICKSPERBEAT * 2, midiData)
+        midiData.extend([0xFF, 0x2F, 0])
+
+        # Write track header and data
+        handle.write(b"MTrk")
+        numBytes = len(midiData)
+        lenBytes = [((numBytes >> i) & 0xff) for i in range(24, -8, -8)]
+        for byte in lenBytes:
+            handle.write(bytes([byte]))
+        for byte in midiData:
+            handle.write(bytes([int(byte) & 0xFF]))
 
     def playScore(self, score):
         measureList = list(score.iterMeasuresWithRepeats())
@@ -309,55 +305,38 @@ class _midi(QObject):
     def _playMIDINow(self, measureList, score):
         if self.kit is None:
             return
-        # Stop any currently playing music and clean up first
+
+        # Stop any currently playing music
         if self._musicPlaying:
             pygame.mixer.music.stop()
             pygame.mixer.music.unload()
             self._musicPlaying = False
-        # We need _midiOut initially to check if MIDI is available,
-        # but it will be deleted before using pygame.mixer.music
-        if self._midiOut is None:
-            # After using pygame.mixer.music, pygame.midi can be in a bad state
-            # Reinitialize it to refresh the device list and make ports valid
-            try:
-                pygame.midi.quit()
-                pygame.midi.init()
-            except:
-                pass
 
-            # Get fresh port ID after reinitializing
-            self._port = getDefaultId()
-            if self._port == -1:
-                return
-            try:
-                self._midiOut = pygame.midi.Output(self._port, _LATENCY, _BUFSIZE)
-            except Exception as e:
-                # If we still can't create output, give up
-                return
+        # Calculate measure timings for highlighting
         baseTime = 0
         bpm = score.scoreData.bpm
         swing = score.scoreData.swing
         msPerBeat = 60000.0 / bpm
         self._measureDetails = []
         lastMeasureIndex = None
+
+        for measure, measureIndex in measureList:
+            if lastMeasureIndex is None or measureIndex != lastMeasureIndex + 1:
+                bpm = score.bpmAtMeasureByIndex(measureIndex)
+            elif measure.newBpm > 0 and bpm != measure.newBpm:
+                bpm = measure.newBpm
+            if bpm == 0:
+                bpm = 120
+            lastMeasureIndex = measureIndex
+            msPerBeat = 60000.0 / bpm
+            times = list(measure.counter.iterTimesMs(msPerBeat, swing))
+            baseTime += times[-1]
+            self._measureDetails.append((measureIndex, baseTime))
+
+        self._measureDetails.reverse()
+
+        # Generate and play MIDI file
         try:
-            for measure, measureIndex in measureList:
-                if lastMeasureIndex is None or measureIndex != lastMeasureIndex + 1:
-                    bpm = score.bpmAtMeasureByIndex(measureIndex)
-                elif measure.newBpm > 0 and bpm != measure.newBpm:
-                    bpm = measure.newBpm
-                if bpm == 0:
-                    bpm = 120
-                lastMeasureIndex = measureIndex
-                msPerBeat = 60000.0 / bpm
-                times = list(measure.counter.iterTimesMs(msPerBeat, swing))
-                baseTime += times[-1]
-                self._measureDetails.append((measureIndex, baseTime))
-            self._measureDetails.reverse()
-            # Delete MIDI output before using pygame.mixer.music
-            # (they can't coexist on the same device)
-            del self._midiOut
-            self._midiOut = None
             midi = BytesIO()
             exportMidi(measureList, score, midi)
             midi.seek(0, 0)
@@ -365,11 +344,11 @@ class _midi(QObject):
             pygame.mixer.music.play()
             self._songStart = time.perf_counter()
             self._musicPlaying = True
+            self.timer.start(int(baseTime + 500))
+            self._measureTimer.start(0)
         except:
             self.timer.timeout.emit()
             raise
-        self.timer.start(int(baseTime + 500))
-        self._measureTimer.start(0)
 
     def loopBars(self, measureIterator, score, loopCount=100):
         measureList = [(measure, measureIndex) for
@@ -387,28 +366,16 @@ class _midi(QObject):
 
     def _cleanupAfterPlayback(self):
         """Clean up after playback"""
-        # Clean up MIDI output first
-        if self._midiOut:
-            try:
-                del self._midiOut
-            except:
-                pass
-            self._midiOut = None
-
         if self._musicPlaying:
             self._measureDetails = []
             self._measureTimer.stop()
             self.highlightMeasure.emit(-1, -1)
             pygame.mixer.music.stop()
-            # Unload the music to free resources
             try:
                 pygame.mixer.music.unload()
             except:
                 pass
             self._musicPlaying = False
-
-        # Don't recreate _midiOut here - it will be created on-demand in playHeadData
-        # Reinitializing pygame.midi causes device ID changes and errors
 
     def shutUp(self):
         # Always stop the timer to prevent it from firing later
@@ -416,16 +383,8 @@ class _midi(QObject):
         self._cleanupAfterPlayback()
 
     def cleanup(self):
-        if self._midiOut is not None:
-            try:
-                self._midiOut.abort()
-            except:
-                pass
-            try:
-                del self._midiOut
-            except:
-                pass
-            self._midiOut = None
+        # Nothing to clean up - pygame.mixer.music is managed globally
+        pass
 
     def _highlight(self):
         delay = -1
@@ -628,15 +587,12 @@ def exportMidi(measureIterator, score, handle):
 
 
 def selectMidiDevice(dev):
-    _PLAYER.cleanup()
-    _PLAYER.setPort(dev.deviceId)
-    return _PLAYER.isGood()
+    # No device selection needed with pygame.mixer.music
+    return True
 
 
 def currentDevice():
-    for dev in _OUTPUT_DEVICES:
-        if dev.deviceId == _PLAYER.port():
-            return dev
+    # No current device with pygame.mixer.music
     return None
 
 
