@@ -38,10 +38,10 @@ class dbFileIterator(object):
             self._lines = {}
             self._readLines = readLines
 
-    def __enter__(self):
+        def __enter__(self):
             return self
 
-    def _process(self):
+        def _process(self):
             linesRead = 0
             for lineType, lineData in self._iterator:
                 if lineData == None:
@@ -59,7 +59,7 @@ class dbFileIterator(object):
                     if linesRead == self._readLines:
                         break
 
-    def __exit__(self, excType, excValue, excTraceback):
+        def __exit__(self, excType, excValue, excTraceback):
             if excType is None:
                 self._process()
             return False
