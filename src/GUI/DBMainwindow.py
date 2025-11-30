@@ -79,6 +79,7 @@ class DrumBurp(QMainWindow, Ui_DrumBurpWindow):
         self._asciiSettings = None
         self._printer = None
         self.setupUi(self)
+        self._fixDuplicateConnections()
         self.scoreScene = None
         self.paperBox.blockSignals(True)
         self.paperBox.clear()
@@ -302,6 +303,86 @@ class DrumBurp(QMainWindow, Ui_DrumBurpWindow):
         if splashUpdates.clickedButton() == neverAgain:
             settings.setValue("NoUpdateSplash", True)
             settings.sync()
+
+    def _fixDuplicateConnections(self):
+        """Fix duplicate signal connections caused by Qt's auto-connect.
+
+        Qt's connectSlotsByName can create duplicate connections when actions
+        are used in multiple places (e.g., menu and toolbar). This method
+        disconnects and reconnects all triggered signals to ensure only one
+        connection exists.
+        """
+        # List of all action slot methods that could have duplicate connections
+        triggered_actions = [
+            (self.actionLoad, self.on_actionLoad_triggered),
+            (self.actionSave, self.on_actionSave_triggered),
+            (self.actionSaveAs, self.on_actionSaveAs_triggered),
+            (self.actionNew, self.on_actionNew_triggered),
+            (self.actionPrint, self.on_actionPrint_triggered),
+            (self.actionExportPDF, self.on_actionExportPDF_triggered),
+            (self.actionExportASCII, self.on_actionExportASCII_triggered),
+            (self.actionExportLilypond, self.on_actionExportLilypond_triggered),
+            (self.actionUndo, self.on_actionUndo_triggered),
+            (self.actionRedo, self.on_actionRedo_triggered),
+            (self.actionFitInWindow, self.on_actionFitInWindow_triggered),
+            (self.actionFitPage, self.on_actionFitPage_triggered),
+            (self.actionAboutDrumBurp, self.on_actionAboutDrumBurp_triggered),
+            (self.actionCheckForUpdates, self.on_actionCheckForUpdates_triggered),
+            (self.actionRefreshMidiDevices, self.on_actionRefreshMidiDevices_triggered),
+            (self.actionExportMIDI, self.on_actionExportMIDI_triggered),
+            (self.actionCopyMeasures, self.on_actionCopyMeasures_triggered),
+            (self.actionPasteMeasures, self.on_actionPasteMeasures_triggered),
+            (self.actionFillPasteMeasures, self.on_actionFillPasteMeasures_triggered),
+            (self.actionClearMeasures, self.on_actionClearMeasures_triggered),
+            (self.actionDeleteMeasures, self.on_actionDeleteMeasures_triggered),
+            (self.actionEditColours, self.on_actionEditColours_triggered),
+        ]
+
+        toggled_actions = [
+            (self.actionPlayScore, self.on_actionPlayScore_toggled),
+            (self.actionLoopBars, self.on_actionLoopBars_toggled),
+            (self.actionPlayOnce, self.on_actionPlayOnce_toggled),
+            (self.actionMuteNotes, self.on_actionMuteNotes_toggled),
+        ]
+
+        # Static method actions (don't need self)
+        static_triggered_actions = [
+            (self.actionWhatsThis, self.on_actionWhatsThis_triggered),
+            (self.actionOnlineManual, self.on_actionOnlineManual_triggered),
+        ]
+
+        # Fix triggered signal connections
+        for action, slot in triggered_actions:
+            try:
+                # Disconnect all existing connections
+                action.triggered.disconnect()
+            except TypeError:
+                # No connections exist, which is fine
+                pass
+            # Reconnect with unique connection flag
+            action.triggered.connect(slot, Qt.UniqueConnection)
+
+        # Fix static triggered signal connections
+        for action, slot in static_triggered_actions:
+            try:
+                # Disconnect all existing connections
+                action.triggered.disconnect()
+            except TypeError:
+                # No connections exist, which is fine
+                pass
+            # Reconnect with unique connection flag
+            action.triggered.connect(slot, Qt.UniqueConnection)
+
+        # Fix toggled signal connections
+        for action, slot in toggled_actions:
+            try:
+                # Disconnect all existing connections
+                action.toggled.disconnect()
+            except TypeError:
+                # No connections exist, which is fine
+                pass
+            # Reconnect with unique connection flag
+            action.toggled.connect(slot, Qt.UniqueConnection)
 
     def _makeQSettings(self):
         if self._fakeStartup:
