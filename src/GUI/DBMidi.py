@@ -220,15 +220,21 @@ class _midi(QObject):
         self.playHeadData(headData)
 
     def playHeadData(self, headData, when=None):
-        # Stop any currently playing note
-        if pygame.mixer.music.get_busy():
-            pygame.mixer.music.stop()
+        # Only play if not currently playing a full score
+        if self._musicPlaying:
+            return
 
-        # Generate a mini MIDI file with just this one note
+        # Defer playback to avoid blocking UI during mouse clicks
+        # Use QTimer.singleShot to play on next event loop iteration
+        QTimer.singleShot(0, lambda: self._playHeadDataDeferred(headData))
+
+    def _playHeadDataDeferred(self, headData):
+        """Actually play the note - called asynchronously to not block UI"""
         try:
             midi = BytesIO()
             self._exportSingleNote(headData, midi)
             midi.seek(0, 0)
+            # Always play the new note, interrupting any previous note
             pygame.mixer.music.load(midi)
             pygame.mixer.music.play()
         except:
@@ -285,8 +291,12 @@ class _midi(QObject):
             encodeSevenBitDelta(0, midiData)
             midiData.extend([_PERCUSSION_NOTE_ON, headData.midiNote, headData.midiVolume])
 
-        # Wait a bit then end track (let note ring)
+        # Wait for note duration, then send NOTE_OFF
         encodeSevenBitDelta(MIDITICKSPERBEAT * 2, midiData)
+        midiData.extend([_PERCUSSION_NOTE_OFF, headData.midiNote, 0])
+
+        # End track immediately after NOTE_OFF
+        encodeSevenBitDelta(0, midiData)
         midiData.extend([0xFF, 0x2F, 0])
 
         # Write track header and data
