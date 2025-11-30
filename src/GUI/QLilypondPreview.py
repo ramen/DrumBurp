@@ -108,7 +108,8 @@ class QLilypondPreview(QGraphicsScene):
         self._waitingTimer.start()
         self._pageIndex = None
         if self._pixmap is not None:
-            self.removeItem(self._pixmap)
+            if self._pixmap.scene() == self:
+                self.removeItem(self._pixmap)
         self._pixmap = None
         self.setSceneRect(self._waiting.boundingRect())
         # Send to exporter
@@ -172,7 +173,8 @@ class QLilypondPreview(QGraphicsScene):
         else:
             self._pageIndex = None
             if self._pixmap is not None:
-                self.removeItem(self._pixmap)
+                if self._pixmap.scene() == self:
+                    self.removeItem(self._pixmap)
             self._pixmap = None
             self._noPreview.setVisible(True)
             self.setSceneRect(self._noPreview.boundingRect())

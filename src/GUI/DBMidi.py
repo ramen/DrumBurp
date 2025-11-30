@@ -492,7 +492,7 @@ def exportMidi(measureIterator, score, handle):
     midiData = _finishMidiData(midiData)
     handle.write(b"MTrk")
     for byte in midiData:
-        handle.write(bytes([byte]))
+        handle.write(bytes([int(byte)]))
 
 
 def selectMidiDevice(dev):

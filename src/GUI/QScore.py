@@ -491,10 +491,12 @@ class QScore(QtWidgets.QGraphicsScene):
 
     def _clearStaffs(self):
         for qStaff in self._qStaffs:
-            self.removeItem(qStaff)
+            if qStaff.scene() == self:
+                self.removeItem(qStaff)
         self._qStaffs = []
         for qSection in self._qSections:
-            self.removeItem(qSection)
+            if qSection.scene() == self:
+                self.removeItem(qSection)
         self._qSections = []
 
     def _addStaff(self, staff):

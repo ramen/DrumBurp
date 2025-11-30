@@ -254,6 +254,13 @@ class Score(object):
         return measure
 
     def getStaffByIndex(self, index):
+        if index < 0 or index >= len(self._staffs):
+            # Return the first staff as a safe default if index is out of range
+            # This can happen during GUI updates when staffs are being rebuilt
+            if self._staffs:
+                return self._staffs[0]
+            # If no staffs exist at all, we have a bigger problem
+            raise IndexError(f"No staffs available (requested index {index})")
         return self._staffs[index]
 
     def numStaffs(self):
@@ -679,8 +686,8 @@ class Score(object):
             return len(self.drumKit)
         else:
             staff = self.getStaffByIndex(index)
-            count = sum(drum.locked or staff.lineIsVisible(index)
-                        for index, drum in enumerate(self.drumKit))
+            count = sum(drum.locked or staff.lineIsVisible(drumIndex)
+                        for drumIndex, drum in enumerate(self.drumKit))
             if count == 0:
                 return 1
             else:
