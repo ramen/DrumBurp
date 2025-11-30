@@ -403,9 +403,7 @@ class DrumBurp(QMainWindow, Ui_DrumBurpWindow):
             reply = QMessageBox.question(self,
                                          "DrumBurp - Unsaved Changes",
                                          "Save unsaved changes?",
-                                         QMessageBox.Yes,
-                                         QMessageBox.No,
-                                         QMessageBox.Cancel)
+                                         QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
             if reply == QMessageBox.Cancel:
                 return False
             elif reply == QMessageBox.Yes:
@@ -417,8 +415,7 @@ class DrumBurp(QMainWindow, Ui_DrumBurpWindow):
                     failReply = QMessageBox.warning(self,
                                                     "Failed Save!",
                                                     msg,
-                                                    QMessageBox.Yes,
-                                                    QMessageBox.No)
+                                                    QMessageBox.Yes | QMessageBox.No)
                     return failReply == QMessageBox.Yes
         return True
 
@@ -537,9 +534,7 @@ class DrumBurp(QMainWindow, Ui_DrumBurpWindow):
                                      "This score was loaded from an older "
                                      "file format. Would you like to make "
                                      "a backup of that file before overwriting?",
-                                     QMessageBox.Yes,
-                                     QMessageBox.No,
-                                     QMessageBox.Cancel)
+                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
         if reply == QMessageBox.Yes:
             backup = self.filename + ".dbff%d.bak" % fileFormat
             if os.path.exists(backup):
