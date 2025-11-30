@@ -23,7 +23,9 @@ classifiers = [
 ]
 dependencies = [
     "PyQt5>=5.15.0",
-    "pygame>=2.0.0",
+    # Note: pygame MIDI support on Linux requires system pygame package
+    # Install with: sudo apt-get install python3-pygame
+    # Then create venv with: uv venv --system-site-packages
 ]
 
 [project.optional-dependencies]
