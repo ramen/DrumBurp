@@ -136,6 +136,7 @@ class _midi(QObject):
         self._midiOut = None
         self.timer = QTimer()
         self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self._onSongEnd)
         self._measureDetails = []
         self._measureTimer = QTimer()
         self._measureTimer.setSingleShot(True)
@@ -224,8 +225,25 @@ class _midi(QObject):
         self._playMIDINow(measureList, score)
 
     def _playMIDINow(self, measureList, score):
-        if self.kit is None or self._midiOut is None:
+        if self.kit is None:
             return
+        # Stop any currently playing music and clean up first
+        if self._musicPlaying:
+            pygame.mixer.music.stop()
+            pygame.mixer.music.unload()
+            self._musicPlaying = False
+        # We need _midiOut initially to check if MIDI is available,
+        # but it will be deleted before using pygame.mixer.music
+        if self._midiOut is None:
+            if self._port == -1:
+                return
+            try:
+                self._midiOut = pygame.midi.Output(self._port, _LATENCY, _BUFSIZE)
+            except Exception as e:
+                print(f"Failed to create MIDI output: {e}")
+                import traceback
+                traceback.print_exc()
+                return
         baseTime = 0
         bpm = score.scoreData.bpm
         swing = score.scoreData.swing
@@ -246,6 +264,8 @@ class _midi(QObject):
                 baseTime += times[-1]
                 self._measureDetails.append((measureIndex, baseTime))
             self._measureDetails.reverse()
+            # Delete MIDI output before using pygame.mixer.music
+            # (they can't coexist on the same device)
             del self._midiOut
             self._midiOut = None
             midi = BytesIO()
@@ -271,23 +291,46 @@ class _midi(QObject):
                 measureList[index] = (measure, measureIndex)
         self._playMIDINow(measureList, score)
 
-    def shutUp(self):
+    def _onSongEnd(self):
+        """Called when song finishes playing naturally (timer expires)"""
+        self._cleanupAfterPlayback()
+
+    def _cleanupAfterPlayback(self):
+        """Clean up after playback"""
+        # Clean up MIDI output first
+        if self._midiOut:
+            try:
+                del self._midiOut
+            except:
+                pass
+            self._midiOut = None
+
         if self._musicPlaying:
-            self.timer.stop()
             self._measureDetails = []
             self._measureTimer.stop()
             self.highlightMeasure.emit(-1, -1)
-            if self._midiOut:
-                del self._midiOut
-                self._midiOut = None
             pygame.mixer.music.stop()
-            # Recreate MIDI output if port is valid
-            if self._port != -1:
-                try:
-                    self._midiOut = pygame.midi.Output(self._port, _LATENCY, _BUFSIZE)
-                except:
-                    self._midiOut = None
+            # Unload the music to free resources
+            try:
+                pygame.mixer.music.unload()
+            except:
+                pass
             self._musicPlaying = False
+
+        # Reinitialize MIDI subsystem after using pygame.mixer.music
+        # This is necessary because the device IDs may have changed
+        try:
+            pygame.midi.quit()
+            pygame.midi.init()
+            # Refresh the port to ensure we have a valid device ID
+            self._port = getDefaultId()
+        except:
+            pass
+
+    def shutUp(self):
+        if self._musicPlaying:
+            self.timer.stop()
+        self._cleanupAfterPlayback()
 
     def cleanup(self):
         if self._midiOut is not None:
