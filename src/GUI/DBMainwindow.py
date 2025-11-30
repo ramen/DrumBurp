@@ -978,17 +978,25 @@ class DrumBurp(QMainWindow, Ui_DrumBurpWindow):
         return True
 
     def on_actionPlayScore_toggled(self, onOff):
-        if onOff:
-            self.tabWidget.setCurrentWidget(self.textTab)
-            self.scoreView.setTopLeft(0, 0)
-            if not self._canPlayback():
-                self.actionPlayScore.toggle()
-                return
-            DBMidi.playScore(self.scoreScene.score)
-            self.musicStart()
-        else:
-            self.musicDone()
-            DBMidi.shutUp()
+        # Prevent re-entry while handling toggle
+        if hasattr(self, '_handlingPlayToggle') and self._handlingPlayToggle:
+            return
+
+        self._handlingPlayToggle = True
+        try:
+            if onOff:
+                self.tabWidget.setCurrentWidget(self.textTab)
+                self.scoreView.setTopLeft(0, 0)
+                if not self._canPlayback():
+                    self.actionPlayScore.setChecked(False)
+                    return
+                DBMidi.playScore(self.scoreScene.score)
+                self.musicStart()
+            else:
+                self.musicDone()
+                DBMidi.shutUp()
+        finally:
+            self._handlingPlayToggle = False
 
     def highlightPlayingMeasure(self, index, nextIndex):
         measure = None

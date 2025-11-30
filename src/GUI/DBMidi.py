@@ -58,43 +58,56 @@ try:
     _HAS_PYGAME = True
 
     def getDefaultId():
+        # Ensure pygame.midi is initialized
+        try:
+            if not pygame.midi.get_init():
+                pygame.midi.init()
+        except:
+            return -1
+
         # Prefer TiMidity or FluidSynth over "Midi Through" ports
         # as Midi Through ports don't produce sound without routing
         preferred_names = [b'TiMidity', b'FluidSynth', b'Fluid', b'Synth']
         avoid_names = [b'Midi Through', b'VirMIDI']
 
-        default_id = pygame.midi.get_default_output_id()
+        try:
+            default_id = pygame.midi.get_default_output_id()
+        except:
+            return -1
 
-        # Check if default is good (not a pass-through port)
-        if default_id != -1:
-            info = pygame.midi.get_device_info(default_id)
-            if info:
-                name = info[1]
-                # If default is not a pass-through port, use it
-                if not any(avoid in name for avoid in avoid_names):
-                    return default_id
+        try:
+            # Check if default is good (not a pass-through port)
+            if default_id != -1:
+                info = pygame.midi.get_device_info(default_id)
+                if info:
+                    name = info[1]
+                    # If default is not a pass-through port, use it
+                    if not any(avoid in name for avoid in avoid_names):
+                        return default_id
 
-        # Look for preferred synthesizer ports
-        for device_id in range(pygame.midi.get_count()):
-            info = pygame.midi.get_device_info(device_id)
-            if info:
-                interface, name, is_input, is_output, opened = info
-                # Check if it's an output device
-                if is_output:
-                    # Prefer synthesizer ports
-                    if any(pref in name for pref in preferred_names):
+            # Look for preferred synthesizer ports
+            for device_id in range(pygame.midi.get_count()):
+                info = pygame.midi.get_device_info(device_id)
+                if info:
+                    interface, name, is_input, is_output, opened = info
+                    # Check if it's an output device
+                    if is_output:
+                        # Prefer synthesizer ports
+                        if any(pref in name for pref in preferred_names):
+                            return device_id
+
+            # Look for any non-pass-through output
+            for device_id in range(pygame.midi.get_count()):
+                info = pygame.midi.get_device_info(device_id)
+                if info:
+                    interface, name, is_input, is_output, opened = info
+                    if is_output and not any(avoid in name for avoid in avoid_names):
                         return device_id
 
-        # Look for any non-pass-through output
-        for device_id in range(pygame.midi.get_count()):
-            info = pygame.midi.get_device_info(device_id)
-            if info:
-                interface, name, is_input, is_output, opened = info
-                if is_output and not any(avoid in name for avoid in avoid_names):
-                    return device_id
-
-        # Fall back to system default
-        return default_id
+            # Fall back to system default
+            return default_id
+        except:
+            return -1
 
     def iterDeviceIds():
         return range(pygame.midi.get_count())
@@ -221,6 +234,8 @@ class _midi(QObject):
     def playHeadData(self, headData, when=None):
         # Ensure MIDI output is available
         if not self._midiOut:
+            # Refresh port ID in case pygame.midi was reinitialized
+            self._port = getDefaultId()
             if self._port != -1:
                 try:
                     self._midiOut = pygame.midi.Output(self._port, _LATENCY, _BUFSIZE)
@@ -236,10 +251,11 @@ class _midi(QObject):
             self._writeMidiNote(headData, when)
         except Exception as e:
             # If we get a host error, the device might be stale
-            # Try to recreate it once
+            # Try to recreate it once with a fresh port ID
             try:
                 del self._midiOut
                 self._midiOut = None
+                self._port = getDefaultId()
                 if self._port != -1:
                     self._midiOut = pygame.midi.Output(self._port, _LATENCY, _BUFSIZE)
                     self._writeMidiNote(headData, when)
@@ -249,28 +265,32 @@ class _midi(QObject):
 
     def _writeMidiNote(self, headData, when):
         """Actually write the MIDI note - separated for error recovery"""
+        # Boost volume for individual note playback (1.25x) to make them more audible
+        # but cap at 127 (max MIDI velocity)
+        boostedVolume = min(127, int(headData.midiVolume * 1.25))
+
         if headData.effect == "flam":
             self._midiOut.write([[[_PERCUSSION_NOTE_ON,
                                    headData.midiNote,
-                                   headData.midiVolume / FLAM_VOLUME_CONSTANT],
+                                   int(boostedVolume / FLAM_VOLUME_CONSTANT)],
                                   when]])
             self._midiOut.write([[[_PERCUSSION_NOTE_ON,
                                    headData.midiNote,
-                                   headData.midiVolume],
+                                   boostedVolume],
                                   when + FLAM_TIME_CONSTANT]])
         elif headData.effect == "drag":
             self._midiOut.write([[[_PERCUSSION_NOTE_ON,
                                    headData.midiNote,
-                                   headData.midiVolume],
+                                   boostedVolume],
                                   when]])
             self._midiOut.write([[[_PERCUSSION_NOTE_ON,
                                    headData.midiNote,
-                                   headData.midiVolume],
+                                   boostedVolume],
                                   when + DRAG_TIME_CONSTANT]])
         elif headData.effect == "choke":
             self._midiOut.write([[[_PERCUSSION_NOTE_ON,
                                    headData.midiNote,
-                                   headData.midiVolume],
+                                   boostedVolume],
                                   when]])
             self._midiOut.write([[[_PERCUSSION_CHOKE,
                                    _CHOKE_MSG,
@@ -279,7 +299,7 @@ class _midi(QObject):
         else:
             self._midiOut.write([[[_PERCUSSION_NOTE_ON,
                                    headData.midiNote,
-                                   headData.midiVolume],
+                                   boostedVolume],
                                   when]])
 
     def playScore(self, score):
@@ -297,14 +317,22 @@ class _midi(QObject):
         # We need _midiOut initially to check if MIDI is available,
         # but it will be deleted before using pygame.mixer.music
         if self._midiOut is None:
+            # After using pygame.mixer.music, pygame.midi can be in a bad state
+            # Reinitialize it to refresh the device list and make ports valid
+            try:
+                pygame.midi.quit()
+                pygame.midi.init()
+            except:
+                pass
+
+            # Get fresh port ID after reinitializing
+            self._port = getDefaultId()
             if self._port == -1:
                 return
             try:
                 self._midiOut = pygame.midi.Output(self._port, _LATENCY, _BUFSIZE)
             except Exception as e:
-                print(f"Failed to create MIDI output: {e}")
-                import traceback
-                traceback.print_exc()
+                # If we still can't create output, give up
                 return
         baseTime = 0
         bpm = score.scoreData.bpm
@@ -383,8 +411,8 @@ class _midi(QObject):
         # Reinitializing pygame.midi causes device ID changes and errors
 
     def shutUp(self):
-        if self._musicPlaying:
-            self.timer.stop()
+        # Always stop the timer to prevent it from firing later
+        self.timer.stop()
         self._cleanupAfterPlayback()
 
     def cleanup(self):
