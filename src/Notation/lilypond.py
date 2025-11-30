@@ -649,13 +649,15 @@ class LilypondScore(object):
 
     def _writeHeader(self):
         self.indenter('title = %s' % lilyString(self.scoreData.title))
-        self.indenter(r'tagline = #(string-append "Score created using '
-                      'DrumBurp %s, engraved with Lilypond " '
-                      '(lilypond-version))' % DB_VERSION)
         if self.scoreData.artistVisible:
             self.indenter('composer = %s' % lilyString(self.scoreData.artist))
         if self.scoreData.creatorVisible:
             self.indenter('arranger = %s' % lilyString(self.scoreData.creator))
+            self.indenter(r'tagline = #(string-append "Score created using '
+                          'DrumBurp %s, engraved with Lilypond " '
+                          '(lilypond-version))' % DB_VERSION)
+        else:
+            self.indenter(r'tagline = ""')
 
     def _writeLayout(self):
         self.indenter(r'#(layout-set-staff-size %d)' % self._lilysize)
