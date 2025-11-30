@@ -449,7 +449,8 @@ class DrumBurp(QMainWindow, Ui_DrumBurpWindow):
     def _writeColours(self, settings):
         for colour in self.colourScheme.iterColours():
             colourRef = colour.colourAttrs.attrName
-            settings.setValue("Colours/" + colourRef(colour))
+            settings.setValue("Colours/" + colourRef,
+                              colour.toString())
 
     def _readColours(self, settings):
         for colour in self.colourScheme.iterColours():
