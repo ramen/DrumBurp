@@ -136,8 +136,11 @@ class ScoreView(QtWidgets.QGraphicsView):
     def startUp(self):
         self.scene().startUp()
 
+    def mousePressEvent(self, event):
+        return super(ScoreView, self).mousePressEvent(event)
+
     def keyPressEvent(self, event):
-        if isinstance(self.scene().focusItem(), QtGui.QGraphicsTextItem):
+        if isinstance(self.scene().focusItem(), QtWidgets.QGraphicsTextItem):
             event.ignore()
             return super(ScoreView, self).keyPressEvent(event)
         if event.key() == QtCore.Qt.Key_Home:

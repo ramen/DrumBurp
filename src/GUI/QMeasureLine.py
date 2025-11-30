@@ -45,6 +45,7 @@ class QMeasureLine(QtWidgets.QGraphicsItem):
         self._staffIndex = staffIndex
         self.setDimensions()
         self.setAcceptHoverEvents(True)
+        self.setAcceptedMouseButtons(QtCore.Qt.AllButtons)
 
     def boundingRect(self):
         return self._rect

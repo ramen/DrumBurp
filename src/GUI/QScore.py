@@ -612,14 +612,16 @@ class QScore(QtWidgets.QGraphicsScene):
         self._ignoreNext = True
 
     def mousePressEvent(self, event):
+        if not self._ignoreNext:
+            # Let the default scene behavior handle event delivery to items
+            super(QScore, self).mousePressEvent(event)
+        else:
+            self._ignoreNext = False
+            event.accept()
+        # After the event has been delivered to items, check if we need to clear drag selection
         item = self.itemAt(event.scenePos(), QtGui.QTransform())
         if not isinstance(item, QMeasure):
             self.clearDragSelection()
-        event.ignore()
-        if self._ignoreNext:
-            self._ignoreNext = False
-        else:
-            super(QScore, self).mousePressEvent(event)
 
     def keyPressEvent(self, event):
         if not event.isAutoRepeat():

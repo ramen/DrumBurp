@@ -49,6 +49,43 @@ class QStaff(QtWidgets.QGraphicsItemGroup):
         self._setStaff(staff)
         self.setFiltersChildEvents(False)
 
+    def mousePressEvent(self, event):
+        # QGraphicsItemGroup intercepts all mouse events by default
+        # We need to manually pass them to child items
+        for item in self.childItems():
+            if item.contains(item.mapFromScene(event.scenePos())):
+                item.mousePressEvent(event)
+                if event.isAccepted():
+                    return
+        super(QStaff, self).mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        # Also need to manually deliver mouse release events
+        for item in self.childItems():
+            if item.contains(item.mapFromScene(event.scenePos())):
+                item.mouseReleaseEvent(event)
+                if event.isAccepted():
+                    return
+        super(QStaff, self).mouseReleaseEvent(event)
+
+    def mouseMoveEvent(self, event):
+        # And mouse move events
+        for item in self.childItems():
+            if item.contains(item.mapFromScene(event.scenePos())):
+                item.mouseMoveEvent(event)
+                if event.isAccepted():
+                    return
+        super(QStaff, self).mouseMoveEvent(event)
+
+    def mouseDoubleClickEvent(self, event):
+        # And double-click events
+        for item in self.childItems():
+            if item.contains(item.mapFromScene(event.scenePos())):
+                item.mouseDoubleClickEvent(event)
+                if event.isAccepted():
+                    return
+        super(QStaff, self).mouseDoubleClickEvent(event)
+
     def numLines(self):
         if self._props.emptyLinesVisible:
             return self._qScore.kitSize

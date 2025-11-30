@@ -80,6 +80,8 @@ class QMeasure(QtWidgets.QGraphicsItem):
         self._potentialHead = None
         self._potentialSet = None
         self.setAcceptHoverEvents(True)
+        self.setAcceptedMouseButtons(QtCore.Qt.AllButtons)
+        self.setFlag(QtWidgets.QGraphicsItem.ItemIsFocusable, False)
         self._measure = measure
         self._displayCols = 0
         self._setDimensions()
@@ -534,6 +536,7 @@ class QMeasure(QtWidgets.QGraphicsItem):
         event.accept()
 
     def mousePressEvent(self, event):
+        event.accept()  # Accept the event so it doesn't propagate
         point = self.mapFromScene(event.scenePos())
         eventType = LeftPress
         np = None
@@ -553,7 +556,7 @@ class QMeasure(QtWidgets.QGraphicsItem):
         self._qScore.sendFsmEvent(eventType(self, np, event.screenPos()))
 
     def mouseMoveEvent(self, event):
-        item = self._qScore.itemAt(event.scenePos())
+        item = self._qScore.itemAt(event.scenePos(), QtGui.QTransform())
         if item is self:
             point = self.mapFromScene(event.scenePos())
             if self._isOverNotes(self._getMouseLine(point)):

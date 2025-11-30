@@ -39,6 +39,7 @@ class QLineLabel(QtWidgets.QGraphicsItem):
         self.setToolTip(drum.name)
         self.setCursor(QtCore.Qt.PointingHandCursor)
         self.setAcceptHoverEvents(True)
+        self.setAcceptedMouseButtons(QtCore.Qt.AllButtons)
 
     def hoverEnterEvent(self, event):
         self._qScore.setStatusMessage("Double click to edit kit information.")

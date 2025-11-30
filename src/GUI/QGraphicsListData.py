@@ -41,6 +41,7 @@ class QGraphicsListData(QGraphicsItem):  # IGNORE:abstract-class-not-used
         self.setRect()
         self.setCursor(Qt.PointingHandCursor)
         self.setAcceptHoverEvents(True)
+        self.setAcceptedMouseButtons(Qt.AllButtons)
 
     def _iterData(self):
         raise NotImplementedError()
