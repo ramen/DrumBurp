@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -18,31 +18,31 @@ class Ui_AlternateWidget(object):
     def setupUi(self, AlternateWidget):
         AlternateWidget.setObjectName(_fromUtf8("AlternateWidget"))
         AlternateWidget.resize(273, 24)
-        self.horizontalLayout = QtGui.QHBoxLayout(AlternateWidget)
-        self.horizontalLayout.setMargin(0)
+        self.horizontalLayout = QtWidgets.QHBoxLayout(AlternateWidget)
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.startBox = QtGui.QSpinBox(AlternateWidget)
+        self.startBox = QtWidgets.QSpinBox(AlternateWidget)
         self.startBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.startBox.setMinimum(1)
         self.startBox.setMaximum(100000000)
         self.startBox.setObjectName(_fromUtf8("startBox"))
         self.horizontalLayout.addWidget(self.startBox)
-        self.endBox = QtGui.QSpinBox(AlternateWidget)
+        self.endBox = QtWidgets.QSpinBox(AlternateWidget)
         self.endBox.setEnabled(True)
         self.endBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.endBox.setReadOnly(False)
-        self.endBox.setButtonSymbols(QtGui.QAbstractSpinBox.UpDownArrows)
+        self.endBox.setButtonSymbols(QtWidgets.QAbstractSpinBox.UpDownArrows)
         self.endBox.setMinimum(1)
         self.endBox.setMaximum(10000000)
         self.endBox.setObjectName(_fromUtf8("endBox"))
         self.horizontalLayout.addWidget(self.endBox)
-        self.rangeCheck = QtGui.QCheckBox(AlternateWidget)
+        self.rangeCheck = QtWidgets.QCheckBox(AlternateWidget)
         self.rangeCheck.setChecked(True)
         self.rangeCheck.setObjectName(_fromUtf8("rangeCheck"))
         self.horizontalLayout.addWidget(self.rangeCheck)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.deleteButton = QtGui.QPushButton(AlternateWidget)
+        self.deleteButton = QtWidgets.QPushButton(AlternateWidget)
         self.deleteButton.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/process-stop.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -52,15 +52,15 @@ class Ui_AlternateWidget(object):
         self.horizontalLayout.addWidget(self.deleteButton)
 
         self.retranslateUi(AlternateWidget)
-        QtCore.QObject.connect(self.rangeCheck, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.endBox.setEnabled)
+        self.rangeCheck.toggled.connect(self.endBox.setEnabled)
         QtCore.QMetaObject.connectSlotsByName(AlternateWidget)
 
     def retranslateUi(self, AlternateWidget):
-        AlternateWidget.setWindowTitle(QtGui.QApplication.translate("AlternateWidget", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.startBox.setToolTip(QtGui.QApplication.translate("AlternateWidget", "Repeat number", None, QtGui.QApplication.UnicodeUTF8))
-        self.endBox.setToolTip(QtGui.QApplication.translate("AlternateWidget", "Repeat number range end", None, QtGui.QApplication.UnicodeUTF8))
-        self.rangeCheck.setToolTip(QtGui.QApplication.translate("AlternateWidget", "Range of repeat numbers?", None, QtGui.QApplication.UnicodeUTF8))
-        self.rangeCheck.setText(QtGui.QApplication.translate("AlternateWidget", "Range?", None, QtGui.QApplication.UnicodeUTF8))
-        self.deleteButton.setToolTip(QtGui.QApplication.translate("AlternateWidget", "Delete this repeat", None, QtGui.QApplication.UnicodeUTF8))
+        AlternateWidget.setWindowTitle(QtWidgets.QApplication.translate("AlternateWidget", "Form"))
+        self.startBox.setToolTip(QtWidgets.QApplication.translate("AlternateWidget", "Repeat number"))
+        self.endBox.setToolTip(QtWidgets.QApplication.translate("AlternateWidget", "Repeat number range end"))
+        self.rangeCheck.setToolTip(QtWidgets.QApplication.translate("AlternateWidget", "Range of repeat numbers?"))
+        self.rangeCheck.setText(QtWidgets.QApplication.translate("AlternateWidget", "Range?"))
+        self.deleteButton.setToolTip(QtWidgets.QApplication.translate("AlternateWidget", "Delete this repeat"))
 
-import DrumBurp_rc
+from GUI import DrumBurp_rc

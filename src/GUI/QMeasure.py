@@ -23,7 +23,7 @@ Created on 5 Jan 2011
 
 '''
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore
 
 from Data.NotePosition import NotePosition
 from Data import DBConstants
@@ -48,7 +48,7 @@ def _painterSaver(method):
     return wrapper
 
 
-class QMeasure(QtGui.QGraphicsItem):
+class QMeasure(QtWidgets.QGraphicsItem):
     def __init__(self, index, qScore, measure, parent):
         super(QMeasure, self).__init__(parent)
         self._props = qScore.displayProperties
@@ -79,7 +79,7 @@ class QMeasure(QtGui.QGraphicsItem):
         self._potentialDrum = None
         self._potentialHead = None
         self._potentialSet = None
-        self.setAcceptsHoverEvents(True)
+        self.setAcceptHoverEvents(True)
         self._measure = measure
         self._displayCols = 0
         self._setDimensions()
@@ -161,7 +161,7 @@ class QMeasure(QtGui.QGraphicsItem):
                 right = "-"
             while len(simText) < len(xValues):
                 simText = left + simText + right
-        for drumIndex in xrange(numLines):
+        for drumIndex in range(numLines):
             lineIndex = self.lineIndex(drumIndex)
             for noteTime, x in enumerate(xValues):
                 if self.isSimile():
@@ -190,9 +190,9 @@ class QMeasure(QtGui.QGraphicsItem):
                 else:
                     text = self._measure.noteAt(noteTime, lineIndex)
                 if text == DBConstants.EMPTY_NOTE:
-                    painter.drawLine(x + dot, lineHeight,
-                                     x + self._qScore.xSpacing - dot,
-                                     lineHeight)
+                    painter.drawLine(int(x + dot), int(lineHeight),
+                                     int(x + self._qScore.xSpacing - dot),
+                                     int(lineHeight))
                 else:
                     br = fontMetric.tightBoundingRect(text)
                     left = x + (self._qScore.xSpacing - br.width()) / 2
@@ -233,7 +233,7 @@ class QMeasure(QtGui.QGraphicsItem):
         baseline = self._notesBottom
         if self.isSimile():
             counter = ["%d" % (beat + 1) for beat in
-                       xrange(self._displayCols)]
+                       range(self._displayCols)]
         else:
             counter = self._measure.count()
         for noteTime, count in enumerate(counter):
@@ -378,7 +378,7 @@ class QMeasure(QtGui.QGraphicsItem):
             font = painter.font()
         painter.setFont(font)
         xValues = [noteTime * self._qScore.xSpacing
-                   for noteTime in xrange(self._displayCols)]
+                   for noteTime in range(self._displayCols)]
         if not self.isSimile() and self._highlight:
             self._paintHighlight(painter, xValues)
         self._paintNotes(painter, xValues)

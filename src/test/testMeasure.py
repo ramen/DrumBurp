@@ -317,7 +317,7 @@ class TestCallBack(unittest.TestCase):
         self.measure = Measure(16)
         self.calls = []
 
-        def myCallBack(position):
+    def myCallBack(position):
             self.calls.append((position.noteTime, position.drumIndex))
         self.measure.setCallBack(myCallBack)
 

@@ -22,7 +22,7 @@ Created on 16 Apr 2011
 @author: Mike Thomas
 
 '''
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets, QtGui
 
 from GUI.QMenuIgnoreCancelClick import QMenuIgnoreCancelClick
 import GUI.DBIcons as DBIcons
@@ -166,13 +166,13 @@ class QMeasureContextMenu(QMenuIgnoreCancelClick):
 
     def _setupStickingSection(self):
         self.addSeparator()
-        action = QtGui.QAction("Show Sticking Above", self,
+        action = QtWidgets.QAction("Show Sticking Above", self,
                                checkable=True)
         action.setChecked(self._measure.showAbove)
         action.triggered.connect(lambda: self._showSticking(
             True, not self._measure.showAbove))
         self.addAction(action)
-        action = QtGui.QAction("Show Sticking Below", self,
+        action = QtWidgets.QAction("Show Sticking Below", self,
                                checkable=True)
         action.setChecked(self._measure.showBelow)
         action.triggered.connect(lambda: self._showSticking(
@@ -234,12 +234,12 @@ class QMeasureContextMenu(QMenuIgnoreCancelClick):
     @QMenuIgnoreCancelClick.menuSelection
     def _deleteStaff(self):
         msg = "Really delete this staff?"
-        yesNo = QtGui.QMessageBox.question(self._qScore.parent(),
+        yesNo = QtWidgets.QMessageBox.question(self._qScore.parent(),
                                            "Delete Staff?",
                                            msg,
-                                           QtGui.QMessageBox.Ok,
-                                           QtGui.QMessageBox.Cancel)
-        if yesNo == QtGui.QMessageBox.Ok:
+                                           QtWidgets.QMessageBox.Ok,
+                                           QtWidgets.QMessageBox.Cancel)
+        if yesNo == QtWidgets.QMessageBox.Ok:
             np = self._np.makeCopy()
             staff = self._score.getStaffByIndex(np.staffIndex)
             arguments = []
@@ -254,12 +254,12 @@ class QMeasureContextMenu(QMenuIgnoreCancelClick):
     @QMenuIgnoreCancelClick.menuSelection
     def _deleteSection(self):
         msg = "Really delete this section?"
-        yesNo = QtGui.QMessageBox.question(self._qScore.parent(),
+        yesNo = QtWidgets.QMessageBox.question(self._qScore.parent(),
                                            "Delete Section?",
                                            msg,
-                                           QtGui.QMessageBox.Ok,
-                                           QtGui.QMessageBox.Cancel)
-        if yesNo == QtGui.QMessageBox.Ok:
+                                           QtWidgets.QMessageBox.Ok,
+                                           QtWidgets.QMessageBox.Cancel)
+        if yesNo == QtWidgets.QMessageBox.Ok:
             np = self._np.makeMeasurePosition()
             startIndex = self._score.getSectionStartStaffIndex(np)
             sectionIndex = self._score.positionToSectionIndex(np)
@@ -269,9 +269,9 @@ class QMeasureContextMenu(QMenuIgnoreCancelClick):
                    and not self._score.getStaffByIndex(np.staffIndex).isSectionEnd()):
                 np.staffIndex += 1
             arguments = []
-            for np.staffIndex in xrange(np.staffIndex, startIndex - 1, -1):
+            for np.staffIndex in range(np.staffIndex, startIndex - 1, -1):
                 staff = self._score.getStaffByIndex(np.staffIndex)
-                for np.measureIndex in xrange(staff.numMeasures() - 1, -1, -1):
+                for np.measureIndex in range(staff.numMeasures() - 1, -1, -1):
                     arguments.append((np.makeCopy(),))
             self._qScore.clearDragSelection()
             self._qScore.addRepeatedCommand("delete section: " + sectionName,
@@ -280,12 +280,12 @@ class QMeasureContextMenu(QMenuIgnoreCancelClick):
     @QMenuIgnoreCancelClick.menuSelection
     def _deleteEmptyMeasures(self):
         msg = "This will delete all empty trailing measures.\nContinue?"
-        yesNo = QtGui.QMessageBox.question(self._qScore.parent(),
+        yesNo = QtWidgets.QMessageBox.question(self._qScore.parent(),
                                            "Delete Empty Measures",
                                            msg,
-                                           QtGui.QMessageBox.Ok,
-                                           QtGui.QMessageBox.Cancel)
-        if yesNo == QtGui.QMessageBox.Ok:
+                                           QtWidgets.QMessageBox.Ok,
+                                           QtWidgets.QMessageBox.Cancel)
+        if yesNo == QtWidgets.QMessageBox.Ok:
             positions = self._score.trailingEmptyMeasures()
             arguments = [(np,) for np in positions]
             self._qScore.clearDragSelection()
@@ -364,7 +364,7 @@ class QMeasureContextMenu(QMenuIgnoreCancelClick):
         if endIndex - startIndex > 0:
             macroName += "s"
         self._qScore.beginMacro(macroName)
-        for simileIndex, measureIndex in enumerate(xrange(startIndex,
+        for simileIndex, measureIndex in enumerate(range(startIndex,
                                                           endIndex + 1)):
             np = self._score.measureIndexToPosition(measureIndex)
             command = ToggleSimileCommand(self._qScore, np,

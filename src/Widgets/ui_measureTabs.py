@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -15,32 +15,26 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+def _translate(context, text, disambig):
+    return QtWidgets.QApplication.translate(context, text, disambig)
 
 
 class Ui_measureTabs(object):
     def setupUi(self, measureTabs):
         measureTabs.setObjectName(_fromUtf8("measureTabs"))
         measureTabs.resize(441, 219)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
             measureTabs.sizePolicy().hasHeightForWidth())
         measureTabs.setSizePolicy(sizePolicy)
-        self.verticalLayout = QtGui.QVBoxLayout(measureTabs)
+        self.verticalLayout = QtWidgets.QVBoxLayout(measureTabs)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.counterTabs = QtGui.QTabWidget(measureTabs)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        self.counterTabs = QtWidgets.QTabWidget(measureTabs)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
@@ -48,25 +42,25 @@ class Ui_measureTabs(object):
         self.counterTabs.setSizePolicy(sizePolicy)
         self.counterTabs.setMinimumSize(QtCore.QSize(415, 111))
         self.counterTabs.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.counterTabs.setTabShape(QtGui.QTabWidget.Triangular)
+        self.counterTabs.setTabShape(QtWidgets.QTabWidget.Triangular)
         self.counterTabs.setObjectName(_fromUtf8("counterTabs"))
-        self.simpleTab = QtGui.QWidget()
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        self.simpleTab = QtWidgets.QWidget()
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
             self.simpleTab.sizePolicy().hasHeightForWidth())
         self.simpleTab.setSizePolicy(sizePolicy)
         self.simpleTab.setObjectName(_fromUtf8("simpleTab"))
-        self.gridLayout = QtGui.QGridLayout(self.simpleTab)
+        self.gridLayout = QtWidgets.QGridLayout(self.simpleTab)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        spacerItem = QtGui.QSpacerItem(
-            0, 20, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            0, 20, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem, 0, 0, 1, 1)
-        self.beatCountComboBox = QtGui.QComboBox(self.simpleTab)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        self.beatCountComboBox = QtWidgets.QComboBox(self.simpleTab)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
@@ -77,9 +71,9 @@ class Ui_measureTabs(object):
         self.beatCountComboBox.setBaseSize(QtCore.QSize(200, 0))
         self.beatCountComboBox.setObjectName(_fromUtf8("beatCountComboBox"))
         self.gridLayout.addWidget(self.beatCountComboBox, 1, 2, 1, 1)
-        self.label_2 = QtGui.QLabel(self.simpleTab)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Preferred)
+        self.label_2 = QtWidgets.QLabel(self.simpleTab)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
@@ -89,9 +83,9 @@ class Ui_measureTabs(object):
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout.addWidget(self.label_2, 0, 1, 1, 1)
-        self.beatsSpinBox = QtGui.QSpinBox(self.simpleTab)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        self.beatsSpinBox = QtWidgets.QSpinBox(self.simpleTab)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
@@ -104,9 +98,9 @@ class Ui_measureTabs(object):
         self.beatsSpinBox.setProperty("value", 4)
         self.beatsSpinBox.setObjectName(_fromUtf8("beatsSpinBox"))
         self.gridLayout.addWidget(self.beatsSpinBox, 0, 2, 1, 1)
-        self.label_3 = QtGui.QLabel(self.simpleTab)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Preferred)
+        self.label_3 = QtWidgets.QLabel(self.simpleTab)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
@@ -116,28 +110,28 @@ class Ui_measureTabs(object):
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.gridLayout.addWidget(self.label_3, 1, 1, 1, 1)
-        spacerItem1 = QtGui.QSpacerItem(
-            0, 20, QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            0, 20, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem1, 0, 3, 1, 1)
         self.counterTabs.addTab(self.simpleTab, _fromUtf8(""))
-        self.complexTab = QtGui.QWidget()
+        self.complexTab = QtWidgets.QWidget()
         self.complexTab.setObjectName(_fromUtf8("complexTab"))
-        self.gridLayout_3 = QtGui.QGridLayout(self.complexTab)
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.complexTab)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
-        self.complexEditButton = QtGui.QPushButton(self.complexTab)
+        self.complexEditButton = QtWidgets.QPushButton(self.complexTab)
         self.complexEditButton.setObjectName(_fromUtf8("complexEditButton"))
         self.gridLayout_3.addWidget(self.complexEditButton, 0, 1, 1, 1)
-        spacerItem2 = QtGui.QSpacerItem(
-            40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout_3.addItem(spacerItem2, 0, 0, 1, 1)
-        spacerItem3 = QtGui.QSpacerItem(
-            40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        spacerItem3 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout_3.addItem(spacerItem3, 0, 2, 1, 1)
         self.counterTabs.addTab(self.complexTab, _fromUtf8(""))
         self.verticalLayout.addWidget(self.counterTabs)
-        self.groupBox = QtGui.QGroupBox(measureTabs)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        self.groupBox = QtWidgets.QGroupBox(measureTabs)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
@@ -147,16 +141,16 @@ class Ui_measureTabs(object):
         self.groupBox.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.groupBox.setBaseSize(QtCore.QSize(200, 0))
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
-        self.verticalLayout_2 = QtGui.QVBoxLayout(self.groupBox)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.groupBox)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.previewText = QtGui.QLabel(self.groupBox)
+        self.previewText = QtWidgets.QLabel(self.groupBox)
         self.previewText.setAlignment(QtCore.Qt.AlignCenter)
         self.previewText.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.previewText.setObjectName(_fromUtf8("previewText"))
         self.verticalLayout_2.addWidget(self.previewText)
         self.verticalLayout.addWidget(self.groupBox)
-        spacerItem4 = QtGui.QSpacerItem(
-            20, 0, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
+        spacerItem4 = QtWidgets.QSpacerItem(
+            20, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
         self.verticalLayout.addItem(spacerItem4)
         self.label_2.setBuddy(self.beatsSpinBox)
 

@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -15,35 +15,30 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+def _translate(context, text, disambig):
+    return QtWidgets.QApplication.translate(context, text, disambig)
 
 class Ui_dbStartup(object):
     def setupUi(self, dbStartup):
         dbStartup.setObjectName(_fromUtf8("dbStartup"))
         dbStartup.resize(771, 335)
-        self.verticalLayout = QtGui.QVBoxLayout(dbStartup)
+        self.verticalLayout = QtWidgets.QVBoxLayout(dbStartup)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.label = QtGui.QLabel(dbStartup)
+        self.label = QtWidgets.QLabel(dbStartup)
         self.label.setTextFormat(QtCore.Qt.RichText)
         self.label.setWordWrap(True)
         self.label.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
-        self.buttonBox = QtGui.QDialogButtonBox(dbStartup)
+        self.buttonBox = QtWidgets.QDialogButtonBox(dbStartup)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.verticalLayout.addWidget(self.buttonBox)
 
         self.retranslateUi(dbStartup)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), dbStartup.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), dbStartup.reject)
+        self.buttonBox.accepted.connect(dbStartup.accept)
+        self.buttonBox.rejected.connect(dbStartup.reject)
         QtCore.QMetaObject.connectSlotsByName(dbStartup)
 
     def retranslateUi(self, dbStartup):

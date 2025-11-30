@@ -22,16 +22,17 @@ Created on Feb 22, 2015
 @author: mike_000
 '''
 import copy
-from PyQt4.QtGui import (QDialog, QColor, QLabel, QPushButton,
-                         QComboBox, QColorDialog, QPen)
-from PyQt4 import QtCore
+from PyQt5.QtWidgets import (QDialog, QLabel, QPushButton,
+                         QComboBox, QColorDialog)
+from PyQt5.QtGui import QColor, QPen
+from PyQt5 import QtCore
 from GUI.ui_dbColours import Ui_ColourPicker
 
 STYLE_MAP = {"None": QtCore.Qt.NoPen,
              "Solid": QtCore.Qt.SolidLine,
              "Dashed": QtCore.Qt.DashLine}
 STYLES = ["None", "Dashed", "Solid"]
-REVERSE_STYLE_MAP = dict((x, y) for (y, x) in STYLE_MAP.iteritems())
+REVERSE_STYLE_MAP = dict((x, y) for (y, x) in STYLE_MAP.items())
 
 
 class ColouredItem(object):
@@ -222,7 +223,7 @@ class ColourInstance(object):
         self.colour.backgroundColour = value
 
     def toString(self):
-        return self.colour.toString()
+        return self.colour
 
     def fromString(self, colString):
         return self.colour.fromString(colString)
@@ -371,7 +372,7 @@ class DBColourPicker(QDialog, Ui_ColourPicker):
 
 
 def main():
-    from PyQt4.QtGui import QApplication
+    from PyQt5.QtWidgets import QApplication
     import sys
     app = QApplication(sys.argv)
     scheme = ColourScheme()
@@ -381,7 +382,7 @@ def main():
     if dialog.result():
         scheme = dialog.getColourScheme()
         for col in scheme.iterColours():
-            print col.colourAttrs.longName, col.toString()
+            print(col.colourAttrs.longName, col)
 
 
 if __name__ == "__main__":

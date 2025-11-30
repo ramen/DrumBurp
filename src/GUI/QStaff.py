@@ -23,7 +23,7 @@ Created on 4 Jan 2011
 
 '''
 
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets, QtGui
 import itertools
 from GUI.QMeasure import QMeasure
 from GUI.QMeasureLine import QMeasureLine
@@ -31,9 +31,10 @@ from GUI.QLineLabel import QLineLabel
 from Data.NotePosition import NotePosition
 
 
-class QStaff(QtGui.QGraphicsItemGroup):
+class QStaff(QtWidgets.QGraphicsItemGroup):
     def __init__(self, staff, index, scene, qScore=None):
-        super(QStaff, self).__init__(scene=scene)
+        super(QStaff, self).__init__()
+        scene.addItem(self)
         self._qScore = qScore if qScore is not None else scene
         self._props = self._qScore.displayProperties
         self._staff = None
@@ -46,7 +47,7 @@ class QStaff(QtGui.QGraphicsItemGroup):
         self._height = 0
         self._hasAlternate = False
         self._setStaff(staff)
-        self.setHandlesChildEvents(False)
+        self.setFiltersChildEvents(False)
 
     def numLines(self):
         if self._props.emptyLinesVisible:

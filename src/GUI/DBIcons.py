@@ -22,7 +22,7 @@ Created on 23 Jan 2011
 @author: Mike Thomas
 '''
 
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets, QtGui
 
 _ICON_CACHE = {"drumburp": "drumburp",
                "repeat": "view-refresh",
@@ -33,7 +33,7 @@ _ICON_CACHE = {"drumburp": "drumburp",
 
 
 def initialiseIcons():
-    for iconName, iconLocation in _ICON_CACHE.iteritems():
+    for iconName, iconLocation in _ICON_CACHE.items():
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/Icons/Icons/" + iconLocation + ".png"),
                        QtGui.QIcon.Normal, QtGui.QIcon.Off)

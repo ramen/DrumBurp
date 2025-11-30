@@ -22,7 +22,7 @@ Created on Jul 19, 2015
 @author: Mike Thomas
 '''
 
-from PyQt4.Qt import QFontDatabase, QFont
+from PyQt5.QtGui import QFontDatabase, QFont
 import Data.FontOptions
 
 
@@ -40,7 +40,7 @@ def initialiseFonts():
              ('Roboto', 'raleway.ttf')]
     for fontName, fontFile in fonts:
         if QFontDatabase.addApplicationFont(":/fonts/" + fontFile) == -1:
-            print fontName
+            print(fontName)
         else:
             font = QFont(fontName)
             Data.FontOptions.FontOptions.addFont(fontName, font)

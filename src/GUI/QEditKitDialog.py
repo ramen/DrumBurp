@@ -25,9 +25,10 @@ Created on 26 Jan 2011
 import copy
 import os
 import string  # IGNORE:deprecated-module
-from PyQt4.QtGui import (QDialog, QRadioButton, QFileDialog, QDesktopServices,
-                         QMessageBox, QInputDialog, QColor, QDialogButtonBox)
-from PyQt4.QtCore import QVariant
+from PyQt5.QtWidgets import (QDialog, QRadioButton, QFileDialog,
+                         QMessageBox, QInputDialog, QDialogButtonBox)
+from PyQt5.QtGui import QDesktopServices, QColor
+from PyQt5.QtCore import QStandardPaths
 from GUI.ui_editKit import Ui_editKitDialog
 from GUI.QDefaultKitManager import QDefaultKitManager
 import GUI.DBMidi as DBMidi
@@ -115,11 +116,11 @@ class QEditKitDialog(QDialog, Ui_editKitDialog):
         self._populate()
 
     def _initialize(self):
-        self.oldDrum.addItem("None", userData=QVariant(-1))
+        self.oldDrum.addItem("None", userData=-1)
         for drumIndex, drum in enumerate(reversed(self._initialKit)):
             drum = copy.deepcopy(drum)
             self._currentKit.append(drum)
-            self.oldDrum.addItem(drum.name, userData=QVariant(drumIndex))
+            self.oldDrum.addItem(drum.name, userData=drumIndex)
             self._oldLines[drum] = drumIndex
 
     @noSounds
@@ -243,9 +244,8 @@ class QEditKitDialog(QDialog, Ui_editKitDialog):
     def _loadKit(self):
         directory = self._scoreDirectory
         if directory is None:
-            home = QDesktopServices.HomeLocation
-            directory = unicode(QDesktopServices.storageLocation(home))
-        fname = QFileDialog.getOpenFileName(parent=self,
+            directory = str(QStandardPaths.writableLocation(QStandardPaths.HomeLocation))
+        fname, _ = QFileDialog.getOpenFileName(parent=self,
                                             caption="Load DrumBurp kit",
                                             directory=directory,
                                             filter=_KIT_FILTER)
@@ -272,27 +272,26 @@ class QEditKitDialog(QDialog, Ui_editKitDialog):
     def _saveKit(self):
         directory = self._scoreDirectory
         if directory is None:
-            home = QDesktopServices.HomeLocation
-            directory = unicode(QDesktopServices.storageLocation(home))
-        fname = QFileDialog.getSaveFileName(parent=self,
+            directory = str(QStandardPaths.writableLocation(QStandardPaths.HomeLocation))
+        fname, _ = QFileDialog.getSaveFileName(parent=self,
                                             caption="Save DrumBurp kit",
                                             directory=directory,
                                             filter=_KIT_FILTER)
         if len(fname) == 0:
             return
-        fname = unicode(fname)
+        fname = str(fname)
         newKit, unused = self.getNewKit()
         DrumKitSerializer.DrumKitSerializer.saveKit(newKit, fname)
         QMessageBox.information(
             self, "Kit saved", "Successfully saved drumkit")
 
     def _drumNameEdited(self):
-        self._currentDrum.name = unicode(self.drumName.text())
+        self._currentDrum.name = str(self.drumName.text())
         drumIndex = self._currentDrumIndex
         self.kitTable.item(drumIndex).setText(self._currentDrum.name)
 
     def _drumAbbrEdited(self):
-        self._currentDrum.abbr = unicode(self.drumAbbr.text())
+        self._currentDrum.abbr = str(self.drumAbbr.text())
         self._checkAbbrs()
 
     def _checkAbbrs(self):
@@ -305,7 +304,7 @@ class QEditKitDialog(QDialog, Ui_editKitDialog):
                 drumIndicesByAbbr[drum.abbr] = []
             drumIndicesByAbbr[drum.abbr].append(index)
         ok = True
-        for indices in drumIndicesByAbbr.itervalues():
+        for indices in drumIndicesByAbbr.values():
             if len(indices) > 1:
                 ok = False
                 for index in indices:
@@ -365,7 +364,7 @@ class QEditKitDialog(QDialog, Ui_editKitDialog):
         self._populateCurrentNoteHead()
         headData = self._currentHeadData
         self.volumeSlider.setValue(headData.midiVolume)
-        midiIndex = self.midiNoteCombo.findData(QVariant(headData.midiNote))
+        midiIndex = self.midiNoteCombo.findData(headData.midiNote)
         self.midiNoteCombo.setCurrentIndex(midiIndex)
         self._setMidiNote()
         self._setEffect(headData.effect)
@@ -509,7 +508,7 @@ class QEditKitDialog(QDialog, Ui_editKitDialog):
 
     def _populateMidiCombo(self):
         for midiNote, midiName in _MIDIDATA:
-            self.midiNoteCombo.addItem(midiName, userData=QVariant(midiNote))
+            self.midiNoteCombo.addItem(midiName, userData=midiNote)
 
     def _checkNotationButtons(self):
         headData = self._currentHeadData
@@ -556,7 +555,7 @@ class QEditKitDialog(QDialog, Ui_editKitDialog):
         self._checkNotationButtons()
 
     def accept(self):
-        if all(old == -1 for old in self._oldLines.itervalues()):
+        if all(old == -1 for old in self._oldLines.values()):
             qtext = ("Discard all existing notes?",
                      "Warning! You have changed the kit, "
                      "but none of the old drums are being "
@@ -633,7 +632,7 @@ _MIDIDATA = [(35, "Acoustic Bass Drum"),
 
 
 def main():
-    from PyQt4.QtGui import QApplication
+    from PyQt5.QtWidgets import QApplication
     import sys
     app = QApplication(sys.argv)
     kit = DrumKitFactory.DrumKitFactory.getNamedDefaultKit()
@@ -645,7 +644,7 @@ def main():
                                            "Kit name")
         if not ok:
             return
-        kitname = unicode(kitname)
+        kitname = str(kitname)
         kitvar = kitname.upper()
         kitvar = "".join([ch if ch.isalnum() else "_" for ch in kitvar])
         kitvar = "_" + kitvar
@@ -664,7 +663,7 @@ def main():
             lines.append(line)
             indent = " " * len(indent)
         lines = ("," + os.linesep).join(lines) + "]"
-        print lines
+        print(lines)
         indent = '%s_HEADS = {' % kitvar
         lines = []
         volumeSymbols = {GHOST_VOLUME: "GHOST_VOLUME",
@@ -697,11 +696,11 @@ def main():
             lines = ("," + os.linesep).join(lines) + "}"
         else:
             lines = '%s_HEADS = {}' % kitvar
-        print lines
-        print ('%s_KIT = {"drums":%s_DRUMS, "heads":%s_HEADS}'
-               % (kitvar, kitvar, kitvar))
-        print 'NAMED_DEFAULTS["%s"] = %s_KIT' % (kitname, kitvar)
-        print 'DEFAULT_KIT_NAMES.append("%s")' % kitname
+        print(lines)
+        print('%s_KIT = {"drums":%s_DRUMS, "heads":%s_HEADS}'
+              % (kitvar, kitvar, kitvar))
+        print('NAMED_DEFAULTS["%s"] = %s_KIT' % (kitname, kitvar))
+        print('DEFAULT_KIT_NAMES.append("%s")' % kitname)
 
 
 if __name__ == "__main__":

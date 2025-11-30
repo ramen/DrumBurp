@@ -22,8 +22,7 @@ Created on 17 Apr 2011
 @author: Mike Thomas
 '''
 
-from PyQt4.QtGui import QDialog
-from PyQt4.QtCore import pyqtSignature
+from PyQt5.QtWidgets import QDialog
 from GUI.ui_dbInfo import Ui_InfoDialog
 from GUI.DBLicense import DBLicenseDialog
 
@@ -33,11 +32,10 @@ class DBInfoDialog(QDialog, Ui_InfoDialog):
         super(DBInfoDialog, self).__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("DrumBurp v%s Information" % version)
-        text = unicode(self.copyrightLabel.text())
+        text = str(self.copyrightLabel.text())
         text += ' This is version %s.' % version
         self.copyrightLabel.setText(text)
 
-    @pyqtSignature("")
     def on_licenseButton_clicked(self):  # IGNORE:R0201
         dlg = DBLicenseDialog(self)
         dlg.exec_()

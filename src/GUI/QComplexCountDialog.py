@@ -23,8 +23,8 @@ Created on 17 Apr 2011
 
 '''
 
-from PyQt4.QtGui import QDialog, QListWidgetItem
-from PyQt4.QtCore import Qt, QVariant, pyqtSignature
+from PyQt5.QtWidgets import QDialog, QListWidgetItem
+from PyQt5.QtCore import Qt
 
 from Data.Beat import Beat
 from Data.MeasureCount import MeasureCount
@@ -54,15 +54,15 @@ class QComplexCountDialog(QDialog, Ui_complexCountDialog):
         for beatNum, beat in enumerate(count):
             countIndex = self._registry.lookupIndex(beat)
             item = QListWidgetItem("".join(beat.count(beatNum + 1)))
-            item.setData(Qt.UserRole, QVariant(countIndex))
+            item.setData(Qt.UserRole(countIndex))
             self.beatList.addItem(item)
         self.beatList.setCurrentRow(0)
         self.preview()
 
     def preview(self):
         self._checkDeleteEnabled()
-        text = "".join(unicode(self.beatList.item(beatNum).text())
-                       for beatNum in xrange(self.beatList.count()))
+        text = "".join(str(self.beatList.item(beatNum).text())
+                       for beatNum in range(self.beatList.count()))
         self.previewText.setText(text)
 
     def _checkDeleteEnabled(self):
@@ -94,14 +94,13 @@ class QComplexCountDialog(QDialog, Ui_complexCountDialog):
         self.preview()
 
     def _updateBeatText(self):
-        for row in xrange(self.beatList.count()):
+        for row in range(self.beatList.count()):
             item = self.beatList.item(row)
             index = item.data(Qt.UserRole).toInt()[0]
             counter = self._registry.getCounterByIndex(index)
             beat = Beat(counter, len(item.text()))
             item.setText("".join(beat.count(row + 1)))
 
-    @pyqtSignature("")
     def on_addButton_clicked(self):
         item = self.beatList.item(self.beatList.count() - 1)
         index = item.data(Qt.UserRole).toInt()[0]
@@ -114,12 +113,11 @@ class QComplexCountDialog(QDialog, Ui_complexCountDialog):
         beat = Beat(counter)
         beatNum = self.beatList.count()
         item = QListWidgetItem("".join(beat.count(beatNum + 1)))
-        item.setData(Qt.UserRole, QVariant(self.countBox.currentIndex()))
+        item.setData(Qt.UserRole(self.countBox.currentIndex()))
         self.beatList.addItem(item)
         self.beatList.setCurrentItem(item)
         self.preview()
 
-    @pyqtSignature("")
     def on_deleteButton_clicked(self):
         self.beatList.takeItem(self.beatList.currentRow())
         self._updateBeatText()
@@ -135,7 +133,7 @@ class QComplexCountDialog(QDialog, Ui_complexCountDialog):
 
     def getCount(self):
         mc = MeasureCount()
-        for row in xrange(self.beatList.count()):
+        for row in range(self.beatList.count()):
             item = self.beatList.item(row)
             index = item.data(Qt.UserRole).toInt()[0]
             counter = self._registry.getCounterByIndex(index)

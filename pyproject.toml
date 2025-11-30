@@ -1,0 +1,69 @@
+[project]
+name = "drumburp"
+version = "1.3.2"
+description = "Drum tab editing software for creating and editing drum tablature"
+authors = [
+    {name = "Michael Thomas", email = "mike@whatang.org"},
+]
+readme = "README.md"
+license = {text = "GPL-3.0-or-later"}
+requires-python = ">=3.8"
+keywords = ["drum", "music", "tablature", "notation", "percussion"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio",
+]
+dependencies = [
+    "PyQt5>=5.15.0",
+    "pygame>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pylint>=2.0.0",
+    "autopep8>=1.5.0",
+    "pre-commit>=2.0.0",
+]
+build = [
+    "pyinstaller>=5.0",
+]
+
+[project.scripts]
+drumburp = "src.DrumBurp:main"
+
+[project.urls]
+Homepage = "https://whatang.org/drumburp"
+Repository = "https://github.com/Whatang/DrumBurp"
+Issues = "https://github.com/Whatang/DrumBurp/issues"
+
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Don't try to auto-discover packages, we'll specify them
+py-modules = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.qrc", "*.ui", "*.png", "*.ico"]
+
+[tool.pylint.messages_control]
+disable = [
+    "C0103",  # Invalid name
+    "C0111",  # Missing docstring
+    "R0902",  # Too many instance attributes
+    "R0913",  # Too many arguments
+    "R0914",  # Too many local variables
+]

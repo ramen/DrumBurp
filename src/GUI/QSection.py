@@ -23,14 +23,15 @@ Created on 26 Jan 2011
 
 '''
 
-from PyQt4.QtGui import QGraphicsTextItem, QTextCursor
-from PyQt4.QtCore import Qt
+from PyQt5.QtWidgets import QGraphicsTextItem
+from PyQt5.QtGui import QTextCursor
+from PyQt5.QtCore import Qt
 from GUI.DBCommands import SetSectionTitleCommand
 
 
 class QSection(QGraphicsTextItem):
     def __init__(self, title, qScore=None, parent=None):
-        super(QSection, self).__init__(parent=parent, scene=qScore)
+        super(QSection, self).__init__(parent=parent)
         self.setDefaultTextColor(
             qScore.parent().colourScheme.text.borderColour)
         font = qScore.displayProperties.sectionFont
@@ -72,7 +73,7 @@ class QSection(QGraphicsTextItem):
             super(QSection, self).keyPressEvent(event)
 
     def focusOutEvent(self, event):
-        text = unicode(self.document().toPlainText())
+        text = str(self.document().toPlainText())
         if text != self._title:
             self._title = text
             command = SetSectionTitleCommand(self.scene(),

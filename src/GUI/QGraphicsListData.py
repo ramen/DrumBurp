@@ -24,21 +24,23 @@ Created on 13 Mar 2011
 '''
 
 
-from PyQt4.QtGui import QGraphicsItem, QFontMetrics, QPen
-from PyQt4.QtCore import QPoint, QRectF, QPointF, Qt
+from PyQt5.QtWidgets import QGraphicsItem
+from PyQt5.QtGui import QFontMetrics, QPen
+from PyQt5.QtCore import QPoint, QRectF, QPointF, Qt
 
 
 class QGraphicsListData(QGraphicsItem):  # IGNORE:abstract-class-not-used
     _editName = ""
 
     def __init__(self, qScore, parent=None):
-        super(QGraphicsListData, self).__init__(parent=parent, scene=qScore)
+        super(QGraphicsListData, self).__init__(parent=parent)
+        qScore.addItem(self)
         self._qScore = qScore
         self._props = qScore.displayProperties
         self._rect = QRectF(0, 0, 0, 0)
         self.setRect()
         self.setCursor(Qt.PointingHandCursor)
-        self.setAcceptsHoverEvents(True)
+        self.setAcceptHoverEvents(True)
 
     def _iterData(self):
         raise NotImplementedError()

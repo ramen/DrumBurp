@@ -33,7 +33,7 @@ from GUI.QEditMeasureDialog import QEditMeasureDialog
 from GUI.QRepeatCountDialog import QRepeatCountDialog
 from GUI.QAlternateDialog import QAlternateDialog
 import GUI.DBFSMEvents as Event
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 
 class DbState(State):

@@ -120,10 +120,10 @@ def is_divisible_by(num, list):
 def makeLilyDuration(beat, ticks, tickNum):
     dur = None
     ticksInFullBeat = beat.ticksPerBeat
-    
+
     #check if the note length could be made up of any combination straight note(s). if it can't, it need to be compound.
     noteCompound = beat.counter.supportsCompound and (not is_divisible_by(ticks, beat.counter.noteDirectory[False].keys()))
-    
+
     #find closest note (start at largest note in ticks, down to smallest)
     note = None
     for i in sorted(beat.counter.noteDirectory[noteCompound].keys(), reverse=True):
@@ -153,7 +153,7 @@ def makeLilyDuration(beat, ticks, tickNum):
         if(ticks > 0 and ticks >= restNote / 2):
             restDotted = True
             #ticks -= restNote / 2
-    
+
     #Setting everything
     finalNote = str(beat.counter.noteDirectory[noteCompound][note])
     if(dotted):
@@ -206,15 +206,15 @@ class LilyDuration(object):
         notesInTuplet.extend(calcComponentNotes(self))
         for i in self._compoundList:
             notesInTuplet.extend(calcComponentNotes(i))
-        
+
         baseNote = max(notesInTuplet)
         tupletNoteCount = 0
         for i in notesInTuplet:
             tupletNoteCount += baseNote / i
-        
+
         #nearest power of 2 (rounding down)
-        tupletWholeNoteLength = 1<<int(log(tupletNoteCount,2)) 
-            
+        tupletWholeNoteLength = 1<<int(log(tupletNoteCount,2))
+
         self.compoundStart = r"\tuplet {0}/{1} {{".format(tupletNoteCount,tupletWholeNoteLength)
 
     def setCompoundEnd(self):
@@ -309,7 +309,7 @@ class LilyMeasure(object):
 
     def _calculateNoteDurations(self, noteTimes):
         durations = {}
-        for direction, timeList in noteTimes.iteritems():
+        for direction, timeList in noteTimes.items():
             durationDict = self._calculateEventDurations(timeList)
             durations[direction] = durationDict
         return durations
@@ -317,7 +317,7 @@ class LilyMeasure(object):
     def _getLilyNotesAndEffects(self, notes):
         lilyNotes = {}
         effects = {STEM_UP: {}, STEM_DOWN: {}}
-        for direction, timeList in notes.iteritems():
+        for direction, timeList in notes.items():
             lilyDict = {}
             effectsDict = collections.defaultdict(list)
             for notePos, head in timeList:
@@ -378,7 +378,7 @@ class LilyMeasure(object):
 
     def _buildVoices(self, noteTimes, durations, lilyNotes, effects):
         wholeRests = collections.defaultdict(dict)
-        for direction, timeList in noteTimes.iteritems():
+        for direction, timeList in noteTimes.items():
             lNotes = lilyNotes[direction]
             lEffects = effects[direction]
             voice = self._voices[direction]
@@ -424,9 +424,9 @@ class LilyMeasure(object):
         lilyNotes, effects = self._getLilyNotesAndEffects(notes)
         wholeRests = self._buildVoices(noteTimes, durations,
                                        lilyNotes, effects)
-        for direction, restTimes in wholeRests.iteritems():
+        for direction, restTimes in wholeRests.items():
             otherDirection = 1 - direction
-            for (rest, index) in restTimes.iteritems():
+            for (rest, index) in restTimes.items():
                 if (otherDirection not in wholeRests
                         or rest not in wholeRests[otherDirection]):
                     self._voices[direction][index] = "s4"
@@ -1074,7 +1074,7 @@ def findLilyPath():
 
 
 def _findWindowsLilyPath():
-    for drive in map(chr, xrange(0x41, 0x5a)):
+    for drive in map(chr, range(0x41, 0x5a)):
         if not os.path.exists(drive + ":"):
             continue
         for basepath in (drive + r":\Program Files\Lilypond",
