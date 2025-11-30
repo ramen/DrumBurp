@@ -136,9 +136,9 @@ def makeLilyDuration(beat, ticks, tickNum):
     #equal = only dotted
     #more than = both
     dotted = False
-    if(ticks > 0 and ticks >= note / 2):
+    if(ticks > 0 and ticks >= note // 2):
         dotted = True
-        ticks -= note / 2
+        ticks -= note // 2
 
     #find note again but for the rest length
     restNote = None
@@ -150,9 +150,9 @@ def makeLilyDuration(beat, ticks, tickNum):
     #same but for dotted
     if not (restNote == None):
         restDotted = False
-        if(ticks > 0 and ticks >= restNote / 2):
+        if(ticks > 0 and ticks >= restNote // 2):
             restDotted = True
-            #ticks -= restNote / 2
+            #ticks -= restNote // 2
 
     #Setting everything
     finalNote = str(beat.counter.noteDirectory[noteCompound][note])
@@ -490,8 +490,8 @@ class LilyMeasure(object):
 class LilyKit(object):
     _HEADS = {"default": "()",
               "harmonic black": "harmonic-black"}
-    _EFFECTS = {"open": '"open"',
-                "stopped": '"stopped"'}
+    _EFFECTS = {"open": "open",
+                "stopped": "stopped"}
 
     def __init__(self, kit):
         self._kit = kit
@@ -565,6 +565,7 @@ class LilyKit(object):
                                                headData.notationHead)
                 lilyEffect = self._EFFECTS.get(headData.notationEffect,
                                                "#f")
+                # For Scheme syntax inside a quoted list, effects should be bare symbols (no quotes)
                 print("   (%s %s %s %d)" % (name,
                                             lilyNoteHead,
                                             lilyEffect,
@@ -1094,7 +1095,7 @@ def _findWindowsLilyPath():
 def _findLinuxLilyPath():
     try:
         path = subprocess.check_output(['which', 'lilypond'])
-        return path.strip()
+        return path.decode('utf-8').strip()
     except subprocess.CalledProcessError:
         pass
     return None

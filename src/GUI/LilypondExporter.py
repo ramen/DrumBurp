@@ -41,7 +41,11 @@ class LilypondExporter(QThread):
         self._outputPath = outputPath
         self._processedPath = self._calcProcessedPath(self._outputPath)
         self._onFinish = onFinish
-        self._lilypondPath = str(lilypondPath)
+        # Ensure lilypondPath is a string, decoding bytes if necessary
+        if isinstance(lilypondPath, bytes):
+            self._lilypondPath = lilypondPath.decode('utf-8')
+        else:
+            self._lilypondPath = str(lilypondPath) if lilypondPath is not None else None
         self._format = self._toFormatString(lilyFormat)
         self._status = self.NOT_STARTED
         self.returnCode = 0
@@ -66,9 +70,9 @@ class LilypondExporter(QThread):
     def run(self):
         try:
             self._status = self.STARTED
-            with open(self._outputPath, 'w') as handle:
+            with open(self._outputPath, 'w', encoding='utf-8') as handle:
                 try:
-                    handle.write(self.lilyString.encode('utf-8'))
+                    handle.write(self.lilyString)
                 except:
                     self._status = self.ERROR_IN_WRITING_LY
                     raise

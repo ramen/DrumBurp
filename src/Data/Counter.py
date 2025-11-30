@@ -68,7 +68,7 @@ class Counter(object):
         #add all regular notes
         i = 1
         while len(self._counts) % i == 0:
-            self.noteDirectory[False][len(self._counts)/i] = i * 4
+            self.noteDirectory[False][len(self._counts)//i] = i * 4
             i *= 2
 
         #If the counter isn't a power of two, it can contain compound notes
@@ -81,7 +81,7 @@ class Counter(object):
             noteType = (1<<int(log(len(self._counts),2))) * 4
             while(j < len(self._counts)):
                 self.noteDirectory[True][j] = noteType
-                noteType /= 2
+                noteType //= 2
                 j *= 2
 
     def __iter__(self):
